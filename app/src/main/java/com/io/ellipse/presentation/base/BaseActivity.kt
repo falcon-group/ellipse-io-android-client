@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.net.UnknownHostException
 
 abstract class BaseActivity<T : BaseViewModel> : AppCompatActivity(), Observer<NavigationState> {
 
@@ -53,7 +55,16 @@ abstract class BaseActivity<T : BaseViewModel> : AppCompatActivity(), Observer<N
     open fun handleCustomNavigation(state: NextScreenState) = Unit
 
     open fun handleError(error: Throwable) {
-        showErrorDialog(error.message ?: "Error")
+        val message = when (error) {
+            is UnknownHostException -> getString(R.string.error_no_connection)
+            is HttpException -> when (error.code()) {
+                400 -> getString(R.string.error_irregular_request)
+                401 -> getString(R.string.error_inappropriate_credentials)
+                else -> getString(R.string.error_network_request_issue)
+            }
+            else -> getString(R.string.error_internal)
+        }
+        showErrorDialog(message)
     }
 
     open fun showErrorDialog(message: String) {

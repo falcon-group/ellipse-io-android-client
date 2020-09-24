@@ -8,6 +8,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import com.io.ellipse.R
+import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
+import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.util.Failure
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,7 +78,11 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
     private fun observeUsernameError(failure: Failure?) {
         usernameInputLayout.error = when {
             failure?.message != null -> failure.message
-            failure?.error != null -> failure.error.localizedMessage
+            failure?.error != null -> when (failure.error) {
+                is EmptyFieldException -> getString(R.string.error_phone_is_empty)
+                is IrregularPhoneNumberException -> getString(R.string.error_phone_is_insufficient)
+                else -> getString(R.string.error_insufficient_field)
+            }
             else -> null
         }
     }
@@ -84,7 +90,10 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
     private fun observePasswordError(failure: Failure?) {
         passwordInputLayout.error = when {
             failure?.message != null -> failure.message
-            failure?.error != null -> failure.error.localizedMessage
+            failure?.error != null -> when (failure.error) {
+                is EmptyFieldException -> getString(R.string.error_password_is_empty)
+                else -> getString(R.string.error_insufficient_field)
+            }
             else -> null
         }
     }

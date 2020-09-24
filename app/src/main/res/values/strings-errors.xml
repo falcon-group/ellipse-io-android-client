@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_no_connection">Internet connection is lost. Enable cellurar data or connect your device to wifi.</string>
+    <string name="error_irregular_request">Irregular requested data.</string>
+    <string name="error_inappropriate_credentials">Login or password does`t match.</string>
+    <string name="error_network_request_issue">Error while proceeding network request.</string>
+    <string name="error_internal">Something went wrong.</string>
+    <string name="error_phone_is_empty">Phone number can not be empty</string>
+    <string name="error_phone_is_insufficient">Phone number is insuffient</string>
+    <string name="error_insufficient_field">Insufficient input</string>
+    <string name="error_password_is_empty">Password can not be empty</string>
+</resources>

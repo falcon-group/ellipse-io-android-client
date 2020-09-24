@@ -4,10 +4,14 @@ import androidx.lifecycle.ViewModel
 import com.io.ellipse.presentation.util.BackState
 import com.io.ellipse.presentation.util.Failure
 import com.io.ellipse.presentation.util.NavigationState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 abstract class BaseViewModel : ViewModel() {
 
@@ -22,8 +26,12 @@ abstract class BaseViewModel : ViewModel() {
         _navigationState.value = BackState()
     }
 
-    suspend fun execute() {
-
+    suspend fun<T> proceed(block: suspend () -> T): T? = try {
+        block()
+    } catch (ex: Exception) {
+        Timber.e(ex)
+        _errorState.value = Failure(error = ex)
+        null
     }
 
     class EmptyViewModel @Inject constructor() : BaseViewModel()

@@ -73,6 +73,11 @@ allprojects {
     }
 }
 
+ext {
+    localProperties = new Properties()
+    file('local.properties').withInputStream { localProperties.load(it) }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
