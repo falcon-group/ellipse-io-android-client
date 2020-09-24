@@ -3,6 +3,8 @@ plugins {
     id 'kotlin-android'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
+    id 'kotlin-android-extensions'
+    id "com.google.protobuf" version "0.8.12"
 }
 
 android {
@@ -15,11 +17,14 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -29,20 +34,58 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     flavorDimensions "default"
     productFlavors {
         prod {
             dimension "default"
-            buildConfigField("String", "API_URL", '""')
+            buildConfigField("String", "API_URL", '"https://elepsio.herokuapp.com/"')
+            buildConfigField("String", "MESSAGE_DIGEST", '"SHA-1"')
+            buildConfigField("String", "KEY_SPEC_ALGORITM", '"AES"')
+            buildConfigField("String", "CIPHER_KEY", '"cipher_key"')
+            buildConfigField("String", "CIPHER_ALGORITHM", '"AES/ECB/PKCS5Padding"')
             versionNameSuffix ""
         }
         dev {
             dimension "default"
-            buildConfigField("String", "API_URL", '""')
+            buildConfigField("String", "API_URL", '"https://elepsio.herokuapp.com/"')
+            buildConfigField("String", "MESSAGE_DIGEST", '"SHA-1"')
+            buildConfigField("String", "KEY_SPEC_ALGORITM", '"AES"')
+            buildConfigField("String", "CIPHER_KEY", '"cipher_master_key"')
+            buildConfigField("String", "CIPHER_ALGORITHM", '"AES/ECB/PKCS5Padding"')
             versionNameSuffix "_dev"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += [
+                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
+        ]
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.10.0"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
         }
     }
 }
@@ -89,17 +132,18 @@ dependencies {
     /*Permission*/
     implementation "ru.superjob:kotlin-permissions:$kotlin_permission"
 
-    /*Preferences*/
-    implementation "com.github.tfcporciuncula:flow-preferences:$flow_preferences_version"
-
     /*Network*/
     implementation "com.google.code.gson:gson:$gson_version"
-    implementation("io.socket:socket.io-client:$socket_io_client_version", {
-        exclude group: 'org.json', module: 'json'
-    })
+
+    /* DataStore */
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha01"
+    implementation "androidx.datastore:datastore-core:1.0.0-alpha01"
+    implementation  "com.google.protobuf:protobuf-javalite:3.11.1"
 
     /* Retrofit */
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$logging_interceptor_version"
+
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
