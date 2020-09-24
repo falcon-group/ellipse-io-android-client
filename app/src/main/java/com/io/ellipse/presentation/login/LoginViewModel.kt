@@ -26,7 +26,7 @@ class LoginViewModel @ViewModelInject constructor(
 
     init {
         sessionExistenceUseCase.retrieveCurrentSession()
-            .onEach { _navigationState.value = MainNavigation() }
+            .onEach { if (it) _navigationState.value = MainNavigation() }
             .launchIn(viewModelScope)
     }
 

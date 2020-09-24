@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/inputsFlow"
+        android:id="@+id/textFlow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/padding_large"
@@ -29,5 +29,16 @@
         android:gravity="center"
         android:text="Main fragment"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_exit_to_app_24"
+        app:fabCustomSize="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textFlow" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

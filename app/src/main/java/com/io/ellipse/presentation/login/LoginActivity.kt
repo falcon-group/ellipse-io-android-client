@@ -1,5 +1,7 @@
 package com.io.ellipse.presentation.login
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import com.io.ellipse.R
@@ -9,6 +11,11 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LoginActivity : BaseActivity<BaseViewModel.EmptyViewModel>() {
+
+
+    companion object {
+        fun newIntent(context: Context) = Intent(context, LoginActivity::class.java)
+    }
 
     override val viewModel: BaseViewModel.EmptyViewModel by viewModels()
 
