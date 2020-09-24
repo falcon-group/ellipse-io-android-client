@@ -10,10 +10,8 @@ import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberExc
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.login.navigation.MainNavigation
 import com.io.ellipse.presentation.util.Failure
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 
 class LoginViewModel @ViewModelInject constructor(
     private val loginUseCase: LoginUseCase,
@@ -26,6 +24,7 @@ class LoginViewModel @ViewModelInject constructor(
 
     init {
         sessionExistenceUseCase.retrieveCurrentSession()
+            .flowOn(Dispatchers.IO)
             .onEach { if (it) _navigationState.value = MainNavigation() }
             .launchIn(viewModelScope)
     }
