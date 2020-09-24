@@ -7,11 +7,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.afollestad.materialdialogs.MaterialDialog
 import com.io.ellipse.R
 import com.io.ellipse.presentation.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 abstract class BaseActivity<T : BaseViewModel> : AppCompatActivity(), Observer<NavigationState> {
 
@@ -41,11 +45,16 @@ abstract class BaseActivity<T : BaseViewModel> : AppCompatActivity(), Observer<N
     open fun handleBackNavigation(state: BackState) = with(state) {
         setResult(code, Intent().putExtras(toBundle()))
         finish()
+        viewModel.navigationState.observerResource {
+
+        }
     }
 
     open fun handleCustomNavigation(state: NextScreenState) = Unit
 
-    open fun handleError(error: Throwable) {}
+    open fun handleError(error: Throwable) {
+        showErrorDialog(error.message ?: "Error")
+    }
 
     open fun showErrorDialog(message: String) {
         val dialog = MaterialDialog(this).show {
@@ -55,19 +64,22 @@ abstract class BaseActivity<T : BaseViewModel> : AppCompatActivity(), Observer<N
         }
     }
 
-    protected fun <R> Flow<ResourceState<R>>.observerResource(
+    protected fun <R> Flow<R>.observerResource(
         failureBlock: (Failure) -> Unit = ::handleErrorMessage,
         progressBlock: (Progress) -> Unit = { },
         successBlock: (Success<R>) -> Unit
-    ) {
-        asLiveData(Dispatchers.Main).observe(this@BaseActivity, Observer {
+    ) = map {
+        Success(data = it) as ResourceState<R>
+    }.catch {
+        emit(Failure(error = it) as ResourceState<R>)
+    }.asLiveData(Dispatchers.Main).observe(this@BaseActivity,
+        Observer {
             when (it) {
                 is Failure -> failureBlock(it)
                 is Progress -> progressBlock(it)
                 is Success<R> -> successBlock(it)
             }
         })
-    }
 
     private fun handleErrorMessage(failure: Failure) {
         when {

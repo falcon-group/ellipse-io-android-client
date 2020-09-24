@@ -11,17 +11,22 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.io.ellipse.presentation.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 abstract class BaseFragment<T : BaseViewModel> : Fragment(), Observer<NavigationState> {
 
-    abstract val viewModel: T
+    protected abstract val viewModel: T
 
     protected abstract val layoutResId: Int @LayoutRes get
 
     private lateinit var navigationStateLiveData: LiveData<NavigationState>
+    private lateinit var errorStateLiveData: LiveData<Failure>
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() = viewModel.navigateBack()
@@ -44,6 +49,8 @@ abstract class BaseFragment<T : BaseViewModel> : Fragment(), Observer<Navigation
         super.onViewCreated(view, savedInstanceState)
         navigationStateLiveData = viewModel.navigationState.asLiveData(Dispatchers.Main)
         navigationStateLiveData.observeForever(this)
+        errorStateLiveData = viewModel.errorState.asLiveData(Dispatchers.Main)
+        errorStateLiveData.observeForever(::handleErrorMessage)
     }
 
     override fun onDestroyView() {
@@ -85,6 +92,11 @@ abstract class BaseFragment<T : BaseViewModel> : Fragment(), Observer<Navigation
     protected open fun handleCustomNavigation(state: NextScreenState) {
         (requireActivity() as? BaseActivity<*>)?.handleCustomNavigation(state)
     }
+
+    protected fun execute(
+        dispatcher: CoroutineContext,
+        block: suspend CoroutineScope.() -> Unit
+    ) = viewModel.viewModelScope.launch(dispatcher, block = block)
 
     private fun handleErrorMessage(failure: Failure) {
         when {
