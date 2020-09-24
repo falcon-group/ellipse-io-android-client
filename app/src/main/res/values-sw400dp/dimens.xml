@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="large_button_height">88dp</dimen>
+
+    <dimen name="margin_micro">2dp</dimen>
+    <dimen name="margin_tiny">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">12dp</dimen>
+    <dimen name="margin_normal">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_giant">100dp</dimen>
+
+    <dimen name="small_text_size">12sp</dimen>
+    <dimen name="big_text_size">20sp</dimen>
+    <dimen name="large_text_size">42sp</dimen>
+
+    <dimen name="small_stroke_width">2dp</dimen>
+    <dimen name="medium_stroke_width">4dp</dimen>
+    <dimen name="large_stroke_width">8dp</dimen>
+
+</resources>
