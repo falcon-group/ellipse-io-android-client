@@ -11,7 +11,10 @@ import com.io.ellipse.R
 import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseFragment
+import com.io.ellipse.presentation.login.navigation.MainNavigation
+import com.io.ellipse.presentation.main.MainActivity
 import com.io.ellipse.presentation.util.Failure
+import com.io.ellipse.presentation.util.NextScreenState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +41,17 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
         usernameEditText.removeTextChangedListener(usernameTextWatcher)
         passwordEditText.removeTextChangedListener(passwordTextWatcher)
         super.onDestroyView()
+    }
+
+    override fun handleCustomNavigation(state: NextScreenState) {
+        when (state) {
+            is MainNavigation -> {
+                val activity = requireActivity()
+                startActivity(MainActivity.newIntent(activity))
+                activity.finish()
+            }
+            else -> super.handleCustomNavigation(state)
+        }
     }
 
     private fun setupViews() {

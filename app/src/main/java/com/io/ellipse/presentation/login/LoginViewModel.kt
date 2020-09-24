@@ -2,21 +2,32 @@ package com.io.ellipse.presentation.login
 
 import android.util.Patterns
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.viewModelScope
 import com.io.ellipse.domain.usecase.LoginUseCase
+import com.io.ellipse.domain.usecase.SessionExistenceUseCase
 import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseViewModel
+import com.io.ellipse.presentation.login.navigation.MainNavigation
 import com.io.ellipse.presentation.util.Failure
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class LoginViewModel @ViewModelInject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val sessionExistenceUseCase: SessionExistenceUseCase
 ) : BaseViewModel() {
 
     companion object {
         private val PHONE_REGEX = Patterns.PHONE.toRegex()
+    }
+
+    init {
+        sessionExistenceUseCase.retrieveCurrentSession()
+            .onEach { _navigationState.value = MainNavigation() }
+            .launchIn(viewModelScope)
     }
 
     private val _usernameError: MutableStateFlow<Failure?> = MutableStateFlow(null)
@@ -42,5 +53,6 @@ class LoginViewModel @ViewModelInject constructor(
 
     suspend fun authorize(username: String, password: String) = proceed {
         loginUseCase.authorize(username, password)
+        _navigationState.value = MainNavigation()
     }
 }
