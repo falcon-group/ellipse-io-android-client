@@ -6,8 +6,8 @@ import com.io.ellipse.domain.usecase.LoginUseCase
 import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseViewModel
-import com.io.ellipse.presentation.login.navigation.MainNavigation
 import com.io.ellipse.presentation.util.Failure
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -40,12 +40,7 @@ class LoginViewModel @ViewModelInject constructor(
         }
     }
 
-    suspend fun authorize(username: String, password: String) {
-        try {
-            loginUseCase.authorize(username, password)
-            _navigationState.value = MainNavigation
-        } catch (ex: Exception) {
-            _errorState.value = Failure(error = ex)
-        }
+    suspend fun authorize(username: String, password: String) = proceed {
+        loginUseCase.authorize(username, password)
     }
 }

@@ -38,20 +38,20 @@ android {
     productFlavors {
         prod {
             dimension "default"
-            buildConfigField("String", "API_URL", '"https://elepsio.herokuapp.com/"')
-            buildConfigField("String", "MESSAGE_DIGEST", '"SHA-1"')
-            buildConfigField("String", "KEY_SPEC_ALGORITM", '"AES"')
-            buildConfigField("String", "CIPHER_KEY", '"cipher_key"')
-            buildConfigField("String", "CIPHER_ALGORITHM", '"AES/ECB/PKCS5Padding"')
+            buildConfigField("String", "API_URL", localProperties['api.url'])
+            buildConfigField("String", "MESSAGE_DIGEST", localProperties['cipher.message_digest'])
+            buildConfigField("String", "KEY_SPEC_ALGORITM", localProperties['cipher.key_spec_algorihtm'])
+            buildConfigField("String", "CIPHER_KEY", localProperties['cipher.secret_key'])
+            buildConfigField("String", "CIPHER_ALGORITHM", localProperties['cipher.algorithm'])
             versionNameSuffix ""
         }
         dev {
             dimension "default"
-            buildConfigField("String", "API_URL", '"https://elepsio.herokuapp.com/"')
-            buildConfigField("String", "MESSAGE_DIGEST", '"SHA-1"')
-            buildConfigField("String", "KEY_SPEC_ALGORITM", '"AES"')
-            buildConfigField("String", "CIPHER_KEY", '"cipher_master_key"')
-            buildConfigField("String", "CIPHER_ALGORITHM", '"AES/ECB/PKCS5Padding"')
+            buildConfigField("String", "API_URL", localProperties['api.url'])
+            buildConfigField("String", "MESSAGE_DIGEST", localProperties['cipher.message_digest'])
+            buildConfigField("String", "KEY_SPEC_ALGORITM", localProperties['cipher.key_spec_algorihtm'])
+            buildConfigField("String", "CIPHER_KEY", localProperties['cipher.secret_key'])
+            buildConfigField("String", "CIPHER_ALGORITHM", localProperties['cipher.algorithm'])
             versionNameSuffix "_dev"
         }
     }
