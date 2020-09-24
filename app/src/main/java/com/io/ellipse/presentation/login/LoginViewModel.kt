@@ -3,12 +3,13 @@ package com.io.ellipse.presentation.login
 import android.util.Patterns
 import androidx.hilt.lifecycle.ViewModelInject
 import com.io.ellipse.domain.usecase.LoginUseCase
+import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
+import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.login.navigation.MainNavigation
 import com.io.ellipse.presentation.util.Failure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
 
 class LoginViewModel @ViewModelInject constructor(
     private val loginUseCase: LoginUseCase
@@ -26,16 +27,15 @@ class LoginViewModel @ViewModelInject constructor(
 
     fun validateUsername(username: String) {
         _usernameError.value = when {
-            username.isBlank() -> Failure()
-//            !username.matches(PHONE_REGEX) -> Failure()
+            username.isBlank() -> Failure(error = EmptyFieldException())
+            !username.matches(PHONE_REGEX) -> Failure(error = IrregularPhoneNumberException())
             else -> null
         }
     }
 
     fun validatePassword(password: String) {
         _passwordError.value = when {
-            password.isBlank() -> Failure()
-//            !password.matches(Patterns.PHONE.toRegex()) -> Failure()
+            password.isBlank() -> Failure(error = EmptyFieldException())
             else -> null
         }
     }
