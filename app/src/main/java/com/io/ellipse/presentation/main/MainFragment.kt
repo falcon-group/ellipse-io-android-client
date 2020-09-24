@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import com.io.ellipse.R
+import com.io.ellipse.common.android.onDelayClick
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.login.LoginActivity
 import com.io.ellipse.presentation.main.navigation.LogoutNavigation
@@ -21,7 +22,7 @@ class MainFragment : BaseFragment<MainViewModel>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        logoutButton.setOnClickListener {
+        logoutButton.onDelayClick {
             execute(Dispatchers.IO) { viewModel.clearSession() }
         }
     }

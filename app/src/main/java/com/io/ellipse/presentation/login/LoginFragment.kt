@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import com.io.ellipse.R
+import com.io.ellipse.common.android.onDelayClick
 import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseFragment
@@ -56,7 +57,7 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
 
     private fun setupViews() {
         initTextInputs()
-        loginButton.setOnClickListener { authorize() }
+        loginButton.onDelayClick { authorize() }
     }
 
     private fun initTextInputs() {
