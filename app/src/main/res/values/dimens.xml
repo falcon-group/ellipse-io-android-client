@@ -15,6 +15,7 @@
     <dimen name="margin_medium">12dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_large_x">48dp</dimen>
     <dimen name="margin_giant">100dp</dimen>
 
     <dimen name="mini_icon_size">16dp</dimen>

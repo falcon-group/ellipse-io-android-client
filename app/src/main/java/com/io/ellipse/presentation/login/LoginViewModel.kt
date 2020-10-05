@@ -5,7 +5,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.io.ellipse.domain.usecase.LoginUseCase
 import com.io.ellipse.domain.usecase.SessionExistenceUseCase
-import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
+import com.io.ellipse.domain.validation.exceptions.base.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.login.navigation.MainNavigation

@@ -14,5 +14,4 @@ interface AuthService {
 
     @POST(LOGIN_ENDPOINT)
     suspend fun authenticate(@Body authRequestBody: AuthRequestBody): AuthResponseBody
-
 }

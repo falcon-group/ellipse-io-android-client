@@ -7,9 +7,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
+import androidx.lifecycle.viewModelScope
 import com.io.ellipse.R
 import com.io.ellipse.common.android.onDelayClick
-import com.io.ellipse.domain.validation.exceptions.login.EmptyFieldException
+import com.io.ellipse.domain.validation.exceptions.base.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.login.navigation.MainNavigation
@@ -69,18 +70,14 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
         }
     }
 
-    private fun initObservers() {
-        viewModel.usernameError.asLiveData(Dispatchers.Main).observe(
-            viewLifecycleOwner,
-            ::observeUsernameError
-        )
-        viewModel.passwordError.asLiveData(Dispatchers.Main).observe(
-            viewLifecycleOwner,
-            ::observePasswordError
-        )
-        viewModel.passwordError.combine(viewModel.usernameError) { password, username ->
+    private fun initObservers() = with(viewModel) {
+        usernameError.asLiveData(viewModelScope.coroutineContext)
+            .observe(viewLifecycleOwner, ::observeUsernameError)
+        passwordError.asLiveData(viewModelScope.coroutineContext)
+            .observe(viewLifecycleOwner, ::observePasswordError)
+        passwordError.combine(viewModel.usernameError) { password, username ->
             password == null && username == null
-        }.flowOn(Dispatchers.IO).asLiveData(Dispatchers.Main).observe(
+        }.flowOn(Dispatchers.IO).asLiveData(viewModelScope.coroutineContext).observe(
             viewLifecycleOwner,
             ::observeLoginButtonAvailability
         )

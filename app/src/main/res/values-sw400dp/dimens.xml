@@ -9,6 +9,7 @@
     <dimen name="margin_medium">12dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_large_x">44dp</dimen>
     <dimen name="margin_giant">100dp</dimen>
 
     <dimen name="small_text_size">12sp</dimen>

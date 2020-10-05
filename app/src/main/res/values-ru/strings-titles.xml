@@ -2,4 +2,7 @@
 <resources>
     <string name="title_error">Произошла ошибка</string>
     <string name="title_login">Логин</string>
+    <string name="title_delete">Удалить</string>
+    <string name="title_logout">Выйти</string>
+
 </resources>

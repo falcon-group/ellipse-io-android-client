@@ -19,8 +19,12 @@ class LoginUseCase @Inject constructor(
             )
         )
         with(authBody) {
-            authPreferences.setAuthToken(authorizationToken)
-            authPreferences.setRefreshToken(refreshToken ?: "")
+            authPreferences.updateData {
+                it.newBuilderForType()
+                    .setAuthorizationToken(authorizationToken)
+                    .setRefreshToken(refreshToken ?: "")
+                    .build()
+            }
         }
     }
 }

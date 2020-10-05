@@ -3,6 +3,7 @@ package com.io.ellipse.data.network.http.rest
 import com.io.ellipse.BuildConfig
 import com.io.ellipse.data.network.http.JSON_SERIALIZER
 import com.io.ellipse.data.network.http.rest.auth.AuthInterceptor
+import com.io.ellipse.data.network.http.rest.auth.AuthenticatorImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -22,6 +23,7 @@ class ServiceFactory @Inject constructor(
 
     private val httpClient by lazy {
         OkHttpClient.Builder()
+            .authenticator(AuthenticatorImpl(this))
             .addInterceptor(authInterceptor)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.MINUTES)

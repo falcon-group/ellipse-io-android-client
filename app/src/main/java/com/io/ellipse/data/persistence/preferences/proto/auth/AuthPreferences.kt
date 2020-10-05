@@ -28,6 +28,6 @@ class AuthPreferences @Inject constructor(
     }
 
     suspend fun setRefreshToken(refreshToken: String) = updateData {
-        it.toBuilder().setAuthorizationToken(refreshToken).build()
+        it.toBuilder().setRefreshToken(refreshToken).build()
     }
 }

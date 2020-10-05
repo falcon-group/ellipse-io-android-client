@@ -40,6 +40,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Ellipse" />
 
+        <activity
+            android:name=".presentation.note.NoteActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoToolbar" />
+
     </application>
 
 </manifest>

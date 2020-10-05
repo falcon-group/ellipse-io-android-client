@@ -12,6 +12,7 @@
     <dimen name="margin_medium">10dp</dimen>
     <dimen name="margin_normal">14dp</dimen>
     <dimen name="margin_large">18dp</dimen>
+    <dimen name="margin_large_x">40dp</dimen>
     <dimen name="margin_giant">80dp</dimen>
 
     <dimen name="small_stroke_width">1dp</dimen>
