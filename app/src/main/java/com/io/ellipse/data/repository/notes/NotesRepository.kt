@@ -2,10 +2,12 @@ package com.io.ellipse.data.repository.notes
 
 import com.io.ellipse.data.map
 import com.io.ellipse.data.network.http.rest.entity.note.request.NoteRequestBody
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
-import com.io.ellipse.data.repository.notes.local.LocalDataSource
-import com.io.ellipse.data.repository.notes.remote.RemoteDataSource
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
+import com.io.ellipse.data.repository.notes.local.LocalNotesDataSource
+import com.io.ellipse.data.repository.notes.remote.RemoteNotesDataSource
 import com.io.ellipse.data.repository.notes.specification.UpdateLocalNoteSpec
+import com.io.ellipse.data.repository.notes.specification.UpdateLocalNoteStateSpec
+import com.io.ellipse.data.repository.notes.specification.UpdateLocalWholeNoteSpec
 import com.io.ellipse.data.repository.notes.specification.UpdateRemoteNoteSpec
 import com.io.ellipse.domain.repository.BaseDataSource
 import com.io.ellipse.domain.repository.DeleteSpec
@@ -17,39 +19,35 @@ import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 class NotesRepository @Inject constructor(
-    private val localDataSource: LocalDataSource,
-    private val remoteDataSource: RemoteDataSource
+    private val localNotesDataSource: LocalNotesDataSource,
+    private val remoteNotesDataSource: RemoteNotesDataSource
 ) : BaseDataSource<NoteRequestBody, NoteEntity> {
 
     override suspend fun create(input: NoteRequestBody): NoteEntity {
-        return localDataSource.create(map(remoteDataSource.create(input)))
+        return localNotesDataSource.create(map(remoteNotesDataSource.create(input)))
     }
 
     override suspend fun update(updateSpec: UpdateSpec): NoteEntity {
         return when (updateSpec) {
             is UpdateRemoteNoteSpec -> update(
-                UpdateLocalNoteSpec(
-                    map(
-                        remoteDataSource.update(
-                            updateSpec
-                        )
-                    )
-                )
+                UpdateLocalWholeNoteSpec(map(remoteNotesDataSource.update(updateSpec)))
             )
-            is UpdateLocalNoteSpec -> localDataSource.update(updateSpec)
+            is UpdateLocalWholeNoteSpec -> localNotesDataSource.update(updateSpec)
+            is UpdateLocalNoteStateSpec -> localNotesDataSource.update(updateSpec)
+            is UpdateLocalNoteSpec -> localNotesDataSource.update(updateSpec)
             else -> throw NotImplementedError()
         }
     }
 
     override suspend fun delete(deleteSpec: DeleteSpec) {
-        remoteDataSource.delete(deleteSpec)
-        localDataSource.delete(deleteSpec)
+        remoteNotesDataSource.delete(deleteSpec)
+        localNotesDataSource.delete(deleteSpec)
     }
 
     override fun retrieve(retrieveSpec: RetrieveSpec): Flow<List<NoteEntity>> {
-        return localDataSource.retrieve(retrieveSpec)
+        return localNotesDataSource.retrieve(retrieveSpec)
             .combine(
-                remoteDataSource.retrieve(retrieveSpec).catch { emit(emptyList()) }
+                remoteNotesDataSource.retrieve(retrieveSpec).catch { emit(emptyList()) }
             ) { local, remote ->
                 val networkItems = remote.map { map(it) }
                 when {
@@ -60,7 +58,7 @@ class NotesRepository @Inject constructor(
                         local
                     }
                     else -> {
-                        networkItems.also { localDataSource.create(it) }
+                        networkItems.also { localNotesDataSource.create(it) }
                     }
                 }
             }

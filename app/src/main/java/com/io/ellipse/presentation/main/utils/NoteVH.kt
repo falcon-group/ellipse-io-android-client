@@ -7,7 +7,7 @@ import com.io.ellipse.R
 import com.io.ellipse.common.android.list.BaseViewHolder
 import com.io.ellipse.common.android.list.OnItemClickListener
 import com.io.ellipse.common.android.onDelayClick
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import java.text.SimpleDateFormat
 
 class NoteVH(view: View) : BaseViewHolder<NoteEntity>(view) {

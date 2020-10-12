@@ -10,9 +10,9 @@ import androidx.lifecycle.observe
 import androidx.lifecycle.viewModelScope
 import com.io.ellipse.R
 import com.io.ellipse.common.android.onDelayClick
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import com.io.ellipse.domain.validation.exceptions.base.EmptyFieldException
-import com.io.ellipse.domain.validation.exceptions.login.IrregularPhoneNumberException
+import com.io.ellipse.domain.validation.exceptions.note.IllegalFieldLengthException
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.util.Failure
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,14 +64,21 @@ class NoteFragment : BaseFragment<NoteViewModel>() {
         super.onDestroyView()
     }
 
+    override fun handleError(error: Throwable) {
+        when (error) {
+            is IllegalFieldLengthException -> showErrorDialog(getString(R.string.error_title_is_insufficient))
+            else -> super.handleError(error)
+        }
+    }
+
     private fun initObservers() = with(viewModel) {
         titleError.asLiveData(viewModelScope.coroutineContext).observe(
             viewLifecycleOwner,
-            ::observeUsernameError
+            ::observeTitleError
         )
         contentError.asLiveData(viewModelScope.coroutineContext).observe(
             viewLifecycleOwner,
-            ::observePasswordError
+            ::observeContentError
         )
         contentError.combine(viewModel.titleError) { password, username ->
             password == null && username == null
@@ -87,23 +94,23 @@ class NoteFragment : BaseFragment<NoteViewModel>() {
             .observe(viewLifecycleOwner, ::observeNote)
     }
 
-    private fun observeUsernameError(failure: Failure?) {
+    private fun observeTitleError(failure: Failure?) {
         titleInputLayout.error = when {
             failure?.message != null -> failure.message
             failure?.error != null -> when (failure.error) {
-                is EmptyFieldException -> getString(R.string.error_phone_is_empty)
-                is IrregularPhoneNumberException -> getString(R.string.error_phone_is_insufficient)
+                is EmptyFieldException -> getString(R.string.error_title_is_empty)
+                is IllegalFieldLengthException -> getString(R.string.error_title_is_insufficient)
                 else -> getString(R.string.error_insufficient_field)
             }
             else -> null
         }
     }
 
-    private fun observePasswordError(failure: Failure?) {
+    private fun observeContentError(failure: Failure?) {
         contentInputLayout.error = when {
             failure?.message != null -> failure.message
             failure?.error != null -> when (failure.error) {
-                is EmptyFieldException -> getString(R.string.error_password_is_empty)
+                is IllegalFieldLengthException -> getString(R.string.error_content_is_insufficient)
                 else -> getString(R.string.error_insufficient_field)
             }
             else -> null

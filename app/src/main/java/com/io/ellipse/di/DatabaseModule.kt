@@ -28,9 +28,4 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun notesDao(database: AppDatabase) = database.notesDao
-
-    @Provides
-    @Singleton
-    fun notesRemoteKeysDao(database: AppDatabase) = database.noteRemoteKeyDao
-
 }

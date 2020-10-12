@@ -7,6 +7,7 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import java.nio.channels.NotYetBoundException
 
 class AuthenticatorImpl constructor(serviceFactory: ServiceFactory) : Authenticator {
 
@@ -15,6 +16,6 @@ class AuthenticatorImpl constructor(serviceFactory: ServiceFactory) : Authentica
     }
 
     override fun authenticate(route: Route?, response: Response): Request? = runBlocking {
-        TODO("Not yet implemented")
+        null
     }
 }

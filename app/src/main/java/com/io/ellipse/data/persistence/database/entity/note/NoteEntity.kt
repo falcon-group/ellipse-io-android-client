@@ -1,4 +1,4 @@
-package com.io.ellipse.data.persistence.database.entity
+package com.io.ellipse.data.persistence.database.entity.note
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -11,5 +11,6 @@ data class NoteEntity constructor(
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
     @ColumnInfo(name = "update_date") val updateDate: Date,
-    @ColumnInfo(name = "create_date") val createDate: Date
+    @ColumnInfo(name = "create_date") val createDate: Date,
+    @ColumnInfo(name = "local_flags") val localFlags: Int = 0
 )

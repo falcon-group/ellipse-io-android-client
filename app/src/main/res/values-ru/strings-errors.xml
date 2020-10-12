@@ -9,4 +9,7 @@
     <string name="error_phone_is_insufficient">Неверный формат введенного телефона</string>
     <string name="error_insufficient_field">Некорректные данные</string>
     <string name="error_password_is_empty">Поле пароля не может быть пустым</string>
+    <string name="error_title_is_empty">Заголовок не можеет быть пустым</string>
+    <string name="error_title_is_insufficient">Длина заголовка должна быть больше 0 и меньше 100</string>
+    <string name="error_content_is_insufficient">Длина содержания должна быть меньше 1000</string>
 </resources>

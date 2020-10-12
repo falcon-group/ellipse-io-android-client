@@ -1,19 +1,24 @@
 package com.io.ellipse.presentation.note
 
 import androidx.hilt.lifecycle.ViewModelInject
-import com.io.ellipse.data.network.http.rest.entity.note.request.NoteRequestBody
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import com.io.ellipse.data.repository.notes.NotesRepository
 import com.io.ellipse.data.repository.notes.specification.RetrieveByIdSpec
-import com.io.ellipse.data.repository.notes.specification.UpdateRemoteNoteSpec
+import com.io.ellipse.domain.usecase.note.CreateNoteUseCase
+import com.io.ellipse.domain.usecase.note.DeleteNoteUseCase
+import com.io.ellipse.domain.usecase.note.UpdateNoteUseCase
 import com.io.ellipse.domain.validation.exceptions.base.EmptyFieldException
 import com.io.ellipse.domain.validation.exceptions.note.IllegalFieldLengthException
 import com.io.ellipse.presentation.base.BaseViewModel
+import com.io.ellipse.presentation.util.BackState
 import com.io.ellipse.presentation.util.Failure
 import kotlinx.coroutines.flow.*
 
 class NoteViewModel @ViewModelInject constructor(
-    private val notesRepository: NotesRepository
+    private val notesRepository: NotesRepository,
+    private val createNoteUseCase: CreateNoteUseCase,
+    private val updateNoteUseCase: UpdateNoteUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase
 ) : BaseViewModel() {
 
     private val _noteEntity: MutableStateFlow<NoteEntity?> = MutableStateFlow(null)
@@ -29,11 +34,19 @@ class NoteViewModel @ViewModelInject constructor(
         .onEach { _noteEntity.value = it }
 
     suspend fun commit(title: String, content: String) = proceed {
-        val body = NoteRequestBody(title, content)
-        when (val current = _noteEntity.first()) {
-            null -> notesRepository.create(body)
-            else -> notesRepository.update(UpdateRemoteNoteSpec(current.id!!, body))
+        if (title.isBlank()) {
+            throw IllegalFieldLengthException()
         }
+        when (val current = _noteEntity.first()) {
+            null -> createNoteUseCase.create(title, content)
+            else -> updateNoteUseCase.update(current.id, title, content)
+        }
+        _navigationState.send(BackState())
+    }
+
+    suspend fun delete() = proceed {
+        deleteNoteUseCase.delete(_noteEntity.first()!!.id)
+        _navigationState.send(BackState())
     }
 
     fun validateTitle(title: String) {

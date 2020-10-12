@@ -19,7 +19,7 @@ interface NotesService {
     suspend fun retrieve(@Path("id") id: String): NoteResponseBody
 
     @GET(NOTES_ENDPOINT)
-    suspend fun retrieve(@QueryMap map: HashMap<String, Any?>): List<NoteResponseBody>
+    suspend fun retrieve(@QueryMap map: Map<String, Any?>): List<NoteResponseBody>
 
     @PATCH("$NOTES_ENDPOINT/{id}")
     suspend fun update(

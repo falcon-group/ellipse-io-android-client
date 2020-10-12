@@ -12,8 +12,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.io.ellipse.R
-import com.io.ellipse.common.android.list.GridItemMarginDecoration
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
+import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
+import com.io.ellipse.common.android.list.decorations.PositionMarginDecoration
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.login.LoginActivity
 import com.io.ellipse.presentation.main.navigation.LogoutNavigation
@@ -27,7 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -67,10 +68,14 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
         notesRecyclerView.adapter = adapter
         notesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         notesRecyclerView.addItemDecoration(GridItemMarginDecoration(margin, margin, 1))
+        val marginTop = requireContext().resources.getDimensionPixelSize(R.dimen.margin_giant)
+        notesRecyclerView.addItemDecoration(PositionMarginDecoration(0, top = marginTop))
+
         addNoteButton.setOnClickListener { viewModel.navigateToNoteCreation() }
         queryTextWatcher = queryEditText.addTextChangedListener {
             search(it?.toString() ?: "")
         }
+        search(queryEditText.text.toString())
     }
 
     override fun onDestroyView() {
@@ -106,7 +111,9 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
     private fun search(query: String) {
         searchJob?.cancel()
         searchJob = viewModel.viewModelScope.launch(Dispatchers.IO) {
-            viewModel.search(query).collectLatest { adapter.submitData(it) }
+            viewModel.search(query).collect {
+                adapter.submitData(it)
+            }
         }
     }
 }

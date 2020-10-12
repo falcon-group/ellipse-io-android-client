@@ -9,4 +9,7 @@
     <string name="error_phone_is_insufficient">Phone number is insuffient</string>
     <string name="error_insufficient_field">Insufficient input</string>
     <string name="error_password_is_empty">Password can not be empty</string>
+    <string name="error_title_is_empty">Title can not be empty</string>
+    <string name="error_title_is_insufficient">Title length could be in range of 1 to 100</string>
+    <string name="error_content_is_insufficient">Content length could be in range of 0 to 1000</string>
 </resources>

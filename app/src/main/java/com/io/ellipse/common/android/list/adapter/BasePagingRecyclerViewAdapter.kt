@@ -4,7 +4,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.io.ellipse.common.android.list.BaseViewHolder
 import com.io.ellipse.common.android.list.OnItemClickListener
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
 
 abstract class BasePagingRecyclerViewAdapter<T : Any, VH : BaseViewHolder<T>>(
     protected var itemClickListener: OnItemClickListener<T>? = null,

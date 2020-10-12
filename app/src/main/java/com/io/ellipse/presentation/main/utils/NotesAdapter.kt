@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import com.io.ellipse.R
 import com.io.ellipse.common.android.list.adapter.BasePagingRecyclerViewAdapter
-import com.io.ellipse.data.persistence.database.entity.NoteEntity
+import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 
 class NotesAdapter(listener: OnNoteInteractListener) :
     BasePagingRecyclerViewAdapter<NoteEntity, NoteVH>(

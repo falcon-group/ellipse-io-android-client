@@ -1,4 +1,4 @@
-package com.io.ellipse.common.android.list
+package com.io.ellipse.common.android.list.decorations
 
 import android.graphics.Rect
 import android.view.View
