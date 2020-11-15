@@ -4,5 +4,14 @@
     <string name="title_login">Логин</string>
     <string name="title_delete">Удалить</string>
     <string name="title_logout">Выйти</string>
+    <string name="title_bluetooth">Bluetooth</string>
+    <string name="title_bluetooth_turned_off">Bluetooth недоступен</string>
+    <string name="title_network_turned_off">Нет доступа к интернету</string>
+    <string name="title_hardware_active">Синзронизация доступна</string>
+    <string name="title_dialog_enable_bluetooth">Необходим Bluetooth</string>
+    <string name="title_search_devices">Поиск устройств</string>
 
+    <string name="content_dialog_enable_bluetooth">
+        Для мониторинга показателей здоровья вам необходимо включить блютуз и присоединиться к необходимому устройству
+    </string>
 </resources>
