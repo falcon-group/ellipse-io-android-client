@@ -16,6 +16,7 @@ import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
 import com.io.ellipse.common.android.list.decorations.PositionMarginDecoration
 import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import com.io.ellipse.presentation.base.BaseFragment
+import com.io.ellipse.presentation.bluetooth.device.DeviceActivity
 import com.io.ellipse.presentation.login.LoginActivity
 import com.io.ellipse.presentation.main.navigation.LogoutNavigation
 import com.io.ellipse.presentation.main.navigation.NoteNavigation
@@ -56,6 +57,10 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
         return when (item.itemId) {
             R.id.menu_item_logout -> {
                 execute(Dispatchers.IO) { viewModel.logout() }
+                true
+            }
+            R.id.menu_item_bluetooth_search -> {
+                startActivity(DeviceActivity.newIntent(requireActivity()))
                 true
             }
             else -> super.onOptionsItemSelected(item)

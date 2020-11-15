@@ -28,7 +28,6 @@ class MainViewModel @ViewModelInject constructor(
 
     fun search(query: String): Flow<PagingData<NoteEntity>> {
         val lastResult = currentSearchResult
-        Log.e("SEARCH", "$query")
         if (query == currentQueryValue && lastResult != null) {
             return lastResult
         }
