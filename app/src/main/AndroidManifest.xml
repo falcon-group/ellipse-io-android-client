@@ -63,18 +63,19 @@
 
         <activity
             android:name=".presentation.bluetooth.device.DeviceActivity"
+            android:label="@string/title_search_devices"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.NoToolbar" />
+            android:theme="@style/Theme.Ellipse" />
 
         <provider
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
 
-        <service android:name=".service.BluetoothReceiverService"
+        <service
+            android:name=".service.BluetoothReceiverService"
             android:singleUser="true"
-            android:stopWithTask="true"
-            />
+            android:stopWithTask="false" />
     </application>
 
 </manifest>

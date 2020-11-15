@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BluetoothScanCallbackImpl @Inject constructor() : ScanCallback() {
 
     private val _deviceActionsChannel: BroadcastChannel<DeviceAction> = BroadcastChannel(

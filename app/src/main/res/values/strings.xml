@@ -4,5 +4,9 @@
     <string name="channel_id" translatable="false">com.ellipse.notification</string>
     <string name="channel_name" translatable="false">Ellipse</string>
     <string name="channel_description" translatable="false">Default channel</string>
+    <string name="title_network_turned_off">Network is disabled</string>
+    <string name="title_hardware_active">Required hardware are active</string>
+    <string name="title_dialog_enable_bluetooth">Bluetooth required</string>
+    <string name="title_search_devices">Search devices</string>
 
 </resources>

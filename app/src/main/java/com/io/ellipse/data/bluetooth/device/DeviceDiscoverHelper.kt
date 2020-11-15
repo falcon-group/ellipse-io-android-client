@@ -11,7 +11,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DeviceDiscoverHelper @Inject constructor(
     private val bluetoothAdapter: BluetoothAdapter
 ) : BroadcastReceiver() {

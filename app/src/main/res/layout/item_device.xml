@@ -4,18 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="56dp">
 
+    <ImageView
+        android:id="@+id/image_state"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:src="@drawable/ic_device_inactive"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginStart="@dimen/margin_small" />
+
     <TextView
         android:id="@+id/text_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
         android:ellipsize="end"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/image_state"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,27 +5,33 @@ import android.content.Context
 import com.io.ellipse.data.bluetooth.connection.support.HeartRateMonitor
 import com.io.ellipse.data.bluetooth.connection.support.mi.v2.Mi2HeartRateMonitor
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BluetoothConnectionManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) : BluetoothGattCallback() {
 
-    private val monitors: List<HeartRateMonitor> = listOf(Mi2HeartRateMonitor())
+    private val monitor: HeartRateMonitor = Mi2HeartRateMonitor()
     private val _currentDevice = MutableStateFlow<BluetoothDevice?>(null)
     private val _gatt = MutableStateFlow<BluetoothGatt?>(null)
-    private val _currentState = MutableStateFlow<ConnectionState?>(null)
+    private val _currentState = MutableStateFlow<BluetoothState?>(null)
 
     val currentDevice: Flow<BluetoothDevice?> = _currentDevice
-    val connectionState: Flow<ConnectionState> = _currentState.filterNotNull()
+    val connectionState: Flow<BluetoothState> = _currentState.filterNotNull()
+
 
     suspend fun connect(device: BluetoothDevice) {
         if (_currentState.first() !is Disconnected) {
             _gatt.first()?.close()
         }
         _gatt.value = device.connectGatt(context, false, this)
-
     }
 
     suspend fun disconnect() {
@@ -47,7 +53,7 @@ class BluetoothConnectionManager @Inject constructor(
                 _currentState.value = Disconnecting(device)
             }
             BluetoothProfile.STATE_DISCONNECTED -> {
-                monitors.forEach { it.onDisconnected(gatt) }
+                monitor.onDisconnected(gatt)
                 _currentState.value = Disconnected(device)
             }
         }
@@ -59,9 +65,8 @@ class BluetoothConnectionManager @Inject constructor(
         status: Int
     ) {
         super.onDescriptorWrite(gatt, descriptor, status)
-        monitors
-            .takeIf { status == BluetoothGatt.GATT_SUCCESS }
-            ?.forEach { it.onDescriptorWrite(gatt, descriptor) }
+        monitor.takeIf { status == BluetoothGatt.GATT_SUCCESS }
+            ?.onDescriptorWrite(gatt, descriptor)
     }
 
     override fun onDescriptorRead(
@@ -78,7 +83,8 @@ class BluetoothConnectionManager @Inject constructor(
         status: Int
     ) {
         super.onCharacteristicWrite(gatt, characteristic, status)
-        monitors.forEach { it.onCharacteristicWrite(gatt, characteristic) }
+        monitor.takeIf { status == BluetoothGatt.GATT_SUCCESS }
+            ?.onCharacteristicWrite(gatt, characteristic)
     }
 
     override fun onCharacteristicChanged(
@@ -86,13 +92,13 @@ class BluetoothConnectionManager @Inject constructor(
         characteristic: BluetoothGattCharacteristic
     ) {
         super.onCharacteristicChanged(gatt, characteristic)
-        monitors.forEach { it.onReceive(gatt, characteristic) }
+        monitor.onCharacteristicChanged(gatt, characteristic)
     }
 
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         super.onServicesDiscovered(gatt, status)
-        monitors.takeIf { status == BluetoothGatt.GATT_SUCCESS }?.forEach { it.onConnected(gatt) }
+        monitor.takeIf { status == BluetoothGatt.GATT_SUCCESS }?.onConnected(gatt)
     }
 
-    val data: Flow<DataReceivedState> = merge(*monitors.map { it.data }.toTypedArray())
+    val data: Flow<HeartRateData> get() = monitor.data.also { Timber.e("$monitor") }
 }

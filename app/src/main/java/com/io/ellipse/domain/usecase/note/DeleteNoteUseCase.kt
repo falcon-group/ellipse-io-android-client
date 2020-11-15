@@ -5,7 +5,9 @@ import com.io.ellipse.data.repository.notes.NotesRepository
 import com.io.ellipse.data.repository.notes.specification.DeleteNoteSpec
 import com.io.ellipse.data.repository.notes.specification.UpdateLocalNoteStateSpec
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DeleteNoteUseCase @Inject constructor(
     private val repository: NotesRepository
 ) {

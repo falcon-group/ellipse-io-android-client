@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class RemoteNotesDataSource @Inject constructor(
     private val notesService: NotesService
 ) : BaseDataSource<NoteRequestBody, NoteResponseBody> {

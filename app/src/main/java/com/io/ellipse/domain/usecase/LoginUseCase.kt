@@ -5,7 +5,9 @@ import com.io.ellipse.data.network.http.rest.entity.auth.response.AuthResponseBo
 import com.io.ellipse.data.network.http.rest.services.AuthService
 import com.io.ellipse.data.persistence.preferences.proto.auth.AuthPreferences
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LoginUseCase @Inject constructor(
     private val authService: AuthService,
     private val authPreferences: AuthPreferences

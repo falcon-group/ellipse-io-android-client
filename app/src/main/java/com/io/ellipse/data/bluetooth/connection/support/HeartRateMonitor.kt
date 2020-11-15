@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
-import com.io.ellipse.data.bluetooth.connection.DataReceivedState
+import com.io.ellipse.data.bluetooth.connection.HeartRateData
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -14,7 +14,7 @@ interface HeartRateMonitor {
 
     val characteristicDomainUUID: String
 
-    val data: Flow<DataReceivedState>
+    val data: Flow<HeartRateData>
 
     fun onConnected(bluetoothGatt: BluetoothGatt)
 
@@ -24,7 +24,7 @@ interface HeartRateMonitor {
 
     fun onCharacteristicWrite(bluetoothGatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic)
 
-    fun onReceive(bluetoothGatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic)
+    fun onCharacteristicChanged(bluetoothGatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic)
 
     operator fun BluetoothGatt.get(uuid: String) : BluetoothGattService {
         return getService(UUID.fromString(uuid))

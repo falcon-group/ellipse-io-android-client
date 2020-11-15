@@ -5,20 +5,17 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import com.io.ellipse.data.bluetooth.connection.*
 import com.io.ellipse.data.bluetooth.connection.support.HeartRateMonitor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-class Mi2HeartRateMonitor() : HeartRateMonitor {
+class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
 
     override val serviceDomainUUID: String = "0000%04x-0000-1000-8000-00805f9b34fb"
 
@@ -68,7 +65,7 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
         const val SEND_ENC_RAND = 0b1000
     }
 
-    private val dataChannel: BroadcastChannel<DataReceivedState> = BroadcastChannel(
+    private val dataChannel: BroadcastChannel<HeartRateData> = BroadcastChannel(
         Channel.CONFLATED
     )
 
@@ -77,6 +74,11 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
     private var authSteps = 0
     private var authKey: ByteArray = random(16)
     private var random: ByteArray = byteArrayOf()
+    private var keepAliveJob: Job? = null
+
+    init {
+        Timber.e("CONSTRUCTION $this")
+    }
 
     override fun onConnected(bluetoothGatt: BluetoothGatt) {
         Timber.e("GATT ${bluetoothGatt}")
@@ -99,9 +101,11 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
         Timber.e("3 $characteristic")
     }
 
-    override val data: Flow<DataReceivedState> = dataChannel.asFlow()
+    override val data: Flow<HeartRateData> get() = dataChannel.asFlow()
+        .also { Timber.e("DATA $this") }
 
     override fun onDisconnected(bluetoothGatt: BluetoothGatt) {
+        keepAliveJob?.cancel()
         authSteps = 0
     }
 
@@ -112,7 +116,7 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
         when (characteristic.uuid.toString()) {
             characteristicOf(Characteristics.AUTH) -> when {
                 authSteps contains AuthSteps.SEND_ENC_RAND -> {
-                    onReceive(bluetoothGatt, characteristic)
+                    onCharacteristicChanged(bluetoothGatt, characteristic)
                 }
             }
             serviceOf(Characteristics.HEART_RATE_CONTROL) -> when (characteristic.value) {
@@ -127,24 +131,16 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
                     Timber.e("HEART_START_CONTINUOUS $result")
                 }
                 Command.HEART_START_CONTINUOUS -> {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        while (true) {
-                            characteristic.value = Command.HEART_KEEP_ALIVE
-                            val result = bluetoothGatt.writeCharacteristic(characteristic)
-                            Timber.e("KEEP_ALIVE $result")
-                            delay(10000)
-                        }
-                    }
+                    keepAliveJob = startKeepingAlive(bluetoothGatt, characteristic)
                 }
             }
         }
     }
 
-    override fun onReceive(
+    override fun onCharacteristicChanged(
         bluetoothGatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic
     ) {
-        Timber.e("RECEIVED ${characteristic.uuid} ${characteristic.value.toList()}")
         when (characteristic.uuid.toString()) {
             characteristicOf(Characteristics.AUTH) -> when {
                 authSteps contains AuthSteps.SEND_ENC_RAND -> {
@@ -170,15 +166,14 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
                     bluetoothGatt.writeCharacteristic(characteristic)
                 }
             }
-            serviceOf(Characteristics.HEART_RATE_CONTROL) -> GlobalScope.launch(
-                Dispatchers.IO
-            ) {
-                Timber.e("${characteristic.value}")
-                dataChannel.sendBlocking(DataReceivedState(characteristic.value))
-                delay(5000)
-                bluetoothGatt.writeCharacteristic(bluetoothGatt.createHearRateCharacteristic())
+            serviceOf(Characteristics.HEART_RATE_MEASURE) -> {
+                val data = characteristic.value
+                val heartRate: Int = data[0] * 100 + data[1]
+                Timber.e("$this $heartRate")
+                dataChannel.sendBlocking(HeartRateData(heartRate))
             }
         }
+
     }
 
     override fun onDescriptorWrite(
@@ -245,5 +240,18 @@ class Mi2HeartRateMonitor() : HeartRateMonitor {
         encrypter.init(Cipher.ENCRYPT_MODE, SecretKeySpec(secret, "AES"))
         Timber.e("RANDOM_1 ${message.toList()}")
         return encrypter.doFinal(message)
+    }
+
+    private fun startKeepingAlive(
+        bluetoothGatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic
+    ): Job? {
+        return GlobalScope.launch(Dispatchers.IO) {
+            while (true) {
+                characteristic.value = Command.HEART_KEEP_ALIVE
+                bluetoothGatt.writeCharacteristic(characteristic)
+                delay(10000)
+            }
+        }
     }
 }

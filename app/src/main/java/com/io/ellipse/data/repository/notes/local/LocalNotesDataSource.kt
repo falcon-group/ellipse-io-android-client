@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LocalNotesDataSource @Inject constructor(
     private val notesDao: NotesDao
 ) : BaseDataSource<NoteEntity, NoteEntity> {

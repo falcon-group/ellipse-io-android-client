@@ -10,7 +10,7 @@ private const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
 private val RANDOM = Random()
 
 
-data class DataReceivedState(val data: ByteArray)
+data class HeartRateData(val heartRate: Int)
 
 fun BluetoothGattCharacteristic.descriptorOf(uuid: String): BluetoothGattDescriptor {
     return descriptorOf(UUID.fromString(uuid))

@@ -7,7 +7,9 @@ import com.io.ellipse.data.repository.notes.specification.UpdateLocalNoteSpec
 import com.io.ellipse.data.repository.notes.specification.UpdateLocalNoteStateSpec
 import com.io.ellipse.data.repository.notes.specification.UpdateRemoteNoteSpec
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class UpdateNoteUseCase @Inject constructor(
     private val repository: NotesRepository
 ) {

@@ -9,12 +9,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.io.ellipse.R
 import com.io.ellipse.common.android.list.OnItemClickListener
 import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
-import com.io.ellipse.data.bluetooth.connection.ConnectionState
+import com.io.ellipse.data.bluetooth.connection.BluetoothState
 import com.io.ellipse.data.bluetooth.state.requestBluetooth
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.bluetooth.device.action.DialogBluetoothAction
@@ -67,6 +68,7 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
         devicesRecyclerView.adapter = adapter
         devicesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         devicesRecyclerView.addItemDecoration(GridItemMarginDecoration(margin, margin, 1))
+        devicesRecyclerView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         viewModel.connectionState
             .asLiveData(Dispatchers.IO)
             .observe(viewLifecycleOwner, Observer(::observeConnectionState))
@@ -90,7 +92,7 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
         viewModel.viewModelScope.launch(Dispatchers.IO) { viewModel.connect(item) }
     }
 
-    private fun observeConnectionState(state: ConnectionState) {
+    private fun observeConnectionState(state: BluetoothState) {
         Timber.e(state.toString())
     }
 
@@ -104,7 +106,7 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
         if (state) {
             viewModel.startScan()
         } else if (checkBluetoothPermissions()) {
-            viewModel.stopScan()
+//            viewModel.stopScan()
         }
     }
 
@@ -118,15 +120,15 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
 
     private fun showDescriptionDialog() {
         MaterialDialog(requireActivity()).show {
-            title(text = "Enable bluetooth")
-            message(text = "Enable bluetooth")
+            title(res = R.string.title_dialog_enable_bluetooth)
+            message(res = R.string.content_dialog_enable_bluetooth)
             cancelable(false)
             cancelOnTouchOutside(false)
-            positiveButton(text = "Yes") {
+            positiveButton(res = android.R.string.yes) {
                 viewModel.showPermissionsDialog()
                 it.dismiss()
             }
-            negativeButton(text = "No") {
+            negativeButton(res = android.R.string.no) {
                 it.dismiss()
             }
         }

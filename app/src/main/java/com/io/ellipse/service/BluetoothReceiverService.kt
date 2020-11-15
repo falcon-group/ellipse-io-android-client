@@ -13,7 +13,6 @@ import com.io.ellipse.data.notification.AppNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
@@ -99,7 +98,7 @@ class BluetoothReceiverService : Service() {
         }
     }
 
-    private fun proceedState(connectionState: ConnectionState) {
+    private fun proceedState(connectionState: BluetoothState) {
         val notification = when (connectionState) {
             is Connecting -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))

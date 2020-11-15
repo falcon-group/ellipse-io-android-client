@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class NotesRepository @Inject constructor(
     private val localNotesDataSource: LocalNotesDataSource,
     private val remoteNotesDataSource: RemoteNotesDataSource

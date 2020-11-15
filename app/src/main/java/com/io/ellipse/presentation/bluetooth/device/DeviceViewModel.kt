@@ -5,7 +5,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.io.ellipse.data.bluetooth.connection.BluetoothConnectionHelper
 import com.io.ellipse.data.bluetooth.connection.BluetoothConnectionManager
-import com.io.ellipse.data.bluetooth.connection.ConnectionState
+import com.io.ellipse.data.bluetooth.connection.BluetoothState
 import com.io.ellipse.data.bluetooth.device.ActionBondedDevices
 import com.io.ellipse.data.bluetooth.device.ActionDeviceFound
 import com.io.ellipse.data.bluetooth.device.BluetoothDeviceManager
@@ -39,7 +39,7 @@ class DeviceViewModel @ViewModelInject constructor(
         BroadcastChannel(Channel.CONFLATED)
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO) { stopScan() }
+        stopScan()
         super.onCleared()
     }
 
@@ -58,7 +58,7 @@ class DeviceViewModel @ViewModelInject constructor(
 
     val bluetoothState: Flow<Boolean> = bluetoothManager.bluetoothState
 
-    val connectionState: Flow<ConnectionState> = connectManager.connectionState
+    val connectionState: Flow<BluetoothState> = connectManager.connectionState
 
     val deviceAction: Flow<ListAction> = deviceManager.subscribeForDevices()
         .combine(connectManager.currentDevice) { action, current ->
@@ -79,7 +79,7 @@ class DeviceViewModel @ViewModelInject constructor(
         }
 
 
-    fun startScan() = deviceManager.startScan()
+    fun startScan() = deviceManager.restartScan()
 
     fun stopScan() = deviceManager.stopScan()
 

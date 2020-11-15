@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class SessionExistenceUseCase @Inject constructor(private val authPreferences: AuthPreferences) {
 
     fun retrieveCurrentSession() = authPreferences.data.take(1).map {

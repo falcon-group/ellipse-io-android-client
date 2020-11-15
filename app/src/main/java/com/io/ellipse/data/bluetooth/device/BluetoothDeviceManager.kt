@@ -9,7 +9,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BluetoothDeviceManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
@@ -27,6 +29,13 @@ class BluetoothDeviceManager @Inject constructor(
         isScanStarted = true
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    fun restartScan() {
+        stopScan()
+        startScan()
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     fun stopScan() {
         bluetoothLeScanner.takeIf { isScanStarted }?.stopScan(bluetoothScanCallback)
         isScanStarted = false

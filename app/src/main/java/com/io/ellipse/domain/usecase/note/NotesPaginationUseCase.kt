@@ -9,7 +9,9 @@ import com.io.ellipse.data.persistence.database.dao.NotesDao
 import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class NotesPaginationUseCase @OptIn(ExperimentalPagingApi::class) @Inject constructor(
     private val notesDao: NotesDao
 ) {

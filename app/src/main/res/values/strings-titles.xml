@@ -5,6 +5,8 @@
     <string name="title_delete">Delete</string>
     <string name="title_logout">Logout</string>
     <string name="title_bluetooth">Bluetooth</string>
+    <string name="title_bluetooth_turned_off">Bluetooth is disabled</string>
+    <string name="content_dialog_enable_bluetooth">"To handle your heart rate you should enable bluetooth "</string>
 
 
 </resources>

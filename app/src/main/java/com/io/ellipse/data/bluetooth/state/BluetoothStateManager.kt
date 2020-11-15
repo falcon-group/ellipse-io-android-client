@@ -1,22 +1,22 @@
 package com.io.ellipse.data.bluetooth.state
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BluetoothStateManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter
@@ -26,14 +26,25 @@ class BluetoothStateManager @Inject constructor(
     }
 
     private val bluetoothReceiver: BluetoothReceiver = BluetoothReceiver()
+    private val bluetoothStateChannel: BroadcastChannel<Boolean> =
+        BroadcastChannel(Channel.CONFLATED)
 
     init {
         context.registerReceiver(bluetoothReceiver, INTENT_FILTER)
+        val isPermissionsGranted = context.checkPermissions(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+        )
+        if (isPermissionsGranted) {
+            bluetoothStateChannel.sendBlocking(isBluetoothEnabled)
+        } else {
+            bluetoothStateChannel.sendBlocking(false)
+        }
     }
 
-    private val bluetoothStateChannel: BroadcastChannel<Boolean> = BroadcastChannel(Channel.CONFLATED)
 
-    val isBluetoothEnabled: Boolean = bluetoothAdapter.isEnabled
+    val isBluetoothEnabled: Boolean get() = bluetoothAdapter.isEnabled
 
     val bluetoothState: Flow<Boolean> = bluetoothStateChannel.asFlow()
 

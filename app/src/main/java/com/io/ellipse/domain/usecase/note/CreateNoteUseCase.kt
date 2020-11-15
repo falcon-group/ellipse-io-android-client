@@ -7,7 +7,9 @@ import com.io.ellipse.data.repository.notes.NotesRepository
 import com.io.ellipse.data.repository.notes.local.LocalNotesDataSource
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CreateNoteUseCase @Inject constructor(
     private val repository: NotesRepository,
     private val localNotesDataSource: LocalNotesDataSource

@@ -1,14 +1,16 @@
 package com.io.ellipse.presentation.main
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.io.ellipse.data.bluetooth.connection.BluetoothConnectionManager
+import com.io.ellipse.data.network.state.NetworkStateManager
 import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
-import com.io.ellipse.domain.usecase.note.DeleteNoteUseCase
 import com.io.ellipse.domain.usecase.LogoutUseCase
+import com.io.ellipse.domain.usecase.main.ApplicationStateUseCase
+import com.io.ellipse.domain.usecase.note.DeleteNoteUseCase
 import com.io.ellipse.domain.usecase.note.NotesPaginationUseCase
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.main.navigation.LogoutNavigation
@@ -20,11 +22,18 @@ import kotlinx.coroutines.flow.Flow
 class MainViewModel @ViewModelInject constructor(
     private val logoutUseCase: LogoutUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val notesPaginationUseCase: NotesPaginationUseCase
+    private val notesPaginationUseCase: NotesPaginationUseCase,
+    private val applicationStateUseCase: ApplicationStateUseCase,
+    private val networkStateManager: NetworkStateManager,
+    private val bluetoothConnectionManager: BluetoothConnectionManager
 ) : BaseViewModel() {
 
     private var currentQueryValue: String? = null
     private var currentSearchResult: Flow<PagingData<NoteEntity>>? = null
+
+    init {
+        networkStateManager.startTracking()
+    }
 
     fun search(query: String): Flow<PagingData<NoteEntity>> {
         val lastResult = currentSearchResult
@@ -54,4 +63,8 @@ class MainViewModel @ViewModelInject constructor(
         logoutUseCase.clearSession()
         _navigationState.sendBlocking(LogoutNavigation())
     }
+
+    fun subscribeAppState() = applicationStateUseCase.subscribeForApplicationState()
+
+    fun subscribeForHeartRate() = bluetoothConnectionManager.data
 }

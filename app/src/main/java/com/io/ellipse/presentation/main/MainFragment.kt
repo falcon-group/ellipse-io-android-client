@@ -8,13 +8,19 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.io.ellipse.R
 import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
 import com.io.ellipse.common.android.list.decorations.PositionMarginDecoration
+import com.io.ellipse.data.bluetooth.connection.HeartRateData
 import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
+import com.io.ellipse.domain.usecase.main.ApplicationState
+import com.io.ellipse.domain.usecase.main.BluetoothDisabledState
+import com.io.ellipse.domain.usecase.main.NetworkDisabledState
 import com.io.ellipse.presentation.base.BaseFragment
 import com.io.ellipse.presentation.bluetooth.device.DeviceActivity
 import com.io.ellipse.presentation.login.LoginActivity
@@ -31,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 @OptIn(ExperimentalPagingApi::class)
@@ -73,14 +80,18 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
         notesRecyclerView.adapter = adapter
         notesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         notesRecyclerView.addItemDecoration(GridItemMarginDecoration(margin, margin, 1))
-        val marginTop = requireContext().resources.getDimensionPixelSize(R.dimen.margin_giant)
-        notesRecyclerView.addItemDecoration(PositionMarginDecoration(0, top = marginTop))
 
         addNoteButton.setOnClickListener { viewModel.navigateToNoteCreation() }
         queryTextWatcher = queryEditText.addTextChangedListener {
             search(it?.toString() ?: "")
         }
         search(queryEditText.text.toString())
+        viewModel.subscribeAppState()
+            .asLiveData(Dispatchers.IO)
+            .observe(viewLifecycleOwner, Observer(::onApplicationStateChange))
+        viewModel.subscribeForHeartRate()
+            .asLiveData(Dispatchers.IO)
+            .observe(viewLifecycleOwner, Observer(::onHeartRateChanged))
     }
 
     override fun onDestroyView() {
@@ -120,5 +131,20 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
                 adapter.submitData(it)
             }
         }
+    }
+
+    private fun onApplicationStateChange(state: ApplicationState) {
+        val (icon, text) = when (state) {
+            is BluetoothDisabledState -> R.drawable.ic_bluetooth_disabled to R.string.title_bluetooth_turned_off
+            is NetworkDisabledState -> R.drawable.ic_no_internet to R.string.title_network_turned_off
+            else -> R.drawable.ic_sync_correct to R.string.title_hardware_active
+        }
+        appStateImageView.setImageResource(icon)
+        appStateTextView.text = getString(text)
+    }
+
+    private fun onHeartRateChanged(rate: HeartRateData) {
+        Timber.e("$rate")
+        lastHeartRateTextView.text = getString(R.string.placeholder_last_heart_rate, rate.heartRate)
     }
 }
