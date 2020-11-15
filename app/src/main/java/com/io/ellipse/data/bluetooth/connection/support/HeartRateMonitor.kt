@@ -2,6 +2,7 @@ package com.io.ellipse.data.bluetooth.connection.support
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import com.io.ellipse.data.bluetooth.connection.DataReceivedState
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,10 @@ interface HeartRateMonitor {
     fun onConnected(bluetoothGatt: BluetoothGatt)
 
     fun onDisconnected(bluetoothGatt: BluetoothGatt)
+
+    fun onDescriptorWrite(bluetoothGatt: BluetoothGatt, descriptor: BluetoothGattDescriptor)
+
+    fun onCharacteristicWrite(bluetoothGatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic)
 
     fun onReceive(bluetoothGatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic)
 

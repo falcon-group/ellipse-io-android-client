@@ -6,7 +6,6 @@ import com.io.ellipse.data.bluetooth.connection.support.HeartRateMonitor
 import com.io.ellipse.data.bluetooth.connection.support.mi.v2.Mi2HeartRateMonitor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
-import java.util.*
 import javax.inject.Inject
 
 class BluetoothConnectionManager @Inject constructor(
@@ -25,7 +24,8 @@ class BluetoothConnectionManager @Inject constructor(
         if (_currentState.first() !is Disconnected) {
             _gatt.first()?.close()
         }
-        _gatt.value = device.connectGatt(context, true, this)
+        _gatt.value = device.connectGatt(context, false, this)
+
     }
 
     suspend fun disconnect() {
@@ -38,7 +38,7 @@ class BluetoothConnectionManager @Inject constructor(
             BluetoothProfile.STATE_CONNECTED -> {
                 _currentDevice.value = device
                 _currentState.value = Connected(device)
-                monitors.forEach { it.onConnected(gatt) }
+                gatt.discoverServices()
             }
             BluetoothProfile.STATE_CONNECTING -> {
                 _currentState.value = Connecting(device)
@@ -54,11 +54,14 @@ class BluetoothConnectionManager @Inject constructor(
     }
 
     override fun onDescriptorWrite(
-        gatt: BluetoothGatt?,
-        descriptor: BluetoothGattDescriptor?,
+        gatt: BluetoothGatt,
+        descriptor: BluetoothGattDescriptor,
         status: Int
     ) {
         super.onDescriptorWrite(gatt, descriptor, status)
+        monitors
+            .takeIf { status == BluetoothGatt.GATT_SUCCESS }
+            ?.forEach { it.onDescriptorWrite(gatt, descriptor) }
     }
 
     override fun onDescriptorRead(
@@ -69,12 +72,26 @@ class BluetoothConnectionManager @Inject constructor(
         super.onDescriptorRead(gatt, descriptor, status)
     }
 
+    override fun onCharacteristicWrite(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        status: Int
+    ) {
+        super.onCharacteristicWrite(gatt, characteristic, status)
+        monitors.forEach { it.onCharacteristicWrite(gatt, characteristic) }
+    }
+
     override fun onCharacteristicChanged(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic
     ) {
         super.onCharacteristicChanged(gatt, characteristic)
         monitors.forEach { it.onReceive(gatt, characteristic) }
+    }
+
+    override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+        super.onServicesDiscovered(gatt, status)
+        monitors.takeIf { status == BluetoothGatt.GATT_SUCCESS }?.forEach { it.onConnected(gatt) }
     }
 
     val data: Flow<DataReceivedState> = merge(*monitors.map { it.data }.toTypedArray())
