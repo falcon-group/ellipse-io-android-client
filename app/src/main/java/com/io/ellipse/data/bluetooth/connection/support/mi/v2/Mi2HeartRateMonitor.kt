@@ -76,33 +76,20 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
     private var random: ByteArray = byteArrayOf()
     private var keepAliveJob: Job? = null
 
-    init {
-        Timber.e("CONSTRUCTION $this")
-    }
 
     override fun onConnected(bluetoothGatt: BluetoothGatt) {
-        Timber.e("GATT ${bluetoothGatt}")
-        Timber.e("DEVICE ${bluetoothGatt.device}")
-        Timber.e("SERVICES ${bluetoothGatt.services}")
-        Timber.e("SERVICE ${serviceOf(Services.AUTH)}")
         val service = bluetoothGatt[serviceOf(Services.AUTH)]
-        Timber.e("$service")
         val characteristic = service[characteristicOf(Characteristics.AUTH)]
-        Timber.e("1 $characteristic")
         if (!bluetoothGatt.setCharacteristicNotification(characteristic, true)) {
             return
         }
-        Timber.e("2 $characteristic")
         if (!bluetoothGatt.writeDescriptor(characteristic.notifyDescriptor(true))) {
             return
         }
         authSteps = authSteps enable AuthSteps.NOTIFIED
-
-        Timber.e("3 $characteristic")
     }
 
     override val data: Flow<HeartRateData> get() = dataChannel.asFlow()
-        .also { Timber.e("DATA $this") }
 
     override fun onDisconnected(bluetoothGatt: BluetoothGatt) {
         keepAliveJob?.cancel()
@@ -123,12 +110,10 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
                 Command.HEART_STOP_MANUAL -> {
                     characteristic.value = Command.HEART_STOP_CONTINUOUS
                     val result = bluetoothGatt.writeCharacteristic(characteristic)
-                    Timber.e("STOP_CONTINUOUS $result")
                 }
                 Command.HEART_STOP_CONTINUOUS -> {
                     characteristic.value = Command.HEART_START_CONTINUOUS
                     val result = bluetoothGatt.writeCharacteristic(characteristic)
-                    Timber.e("HEART_START_CONTINUOUS $result")
                 }
                 Command.HEART_START_CONTINUOUS -> {
                     keepAliveJob = startKeepingAlive(bluetoothGatt, characteristic)
@@ -148,17 +133,14 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
                 }
                 authSteps contains AuthSteps.REQUEST_RAND -> {
                     random = try {
-                        Timber.e("ENCRYPTION ${characteristic.value.asList()}")
                         val result = characteristic.value.takeLast(16).toByteArray()
-                        aesEncrypt(result, authKey).also { Timber.e("ENCRYPTION_STOP") }
+                        aesEncrypt(result, authKey)
                     } catch (ex: Exception) {
-                        Timber.e(ex)
                         byteArrayOf()
                     }
                     authSteps = authSteps enable AuthSteps.SEND_ENC_RAND
                     characteristic.value = commandOf(Command.SEND_ENCRYPTED, random)
                     val result = bluetoothGatt.writeCharacteristic(characteristic)
-                    Timber.e("ENCRYPTION_RESULT $result")
                 }
                 authSteps contains AuthSteps.SEND_KEY -> {
                     authSteps = authSteps enable AuthSteps.REQUEST_RAND
@@ -169,7 +151,6 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
             serviceOf(Characteristics.HEART_RATE_MEASURE) -> {
                 val data = characteristic.value
                 val heartRate: Int = data[0] * 100 + data[1]
-                Timber.e("$this $heartRate")
                 dataChannel.sendBlocking(HeartRateData(heartRate))
             }
         }
@@ -187,39 +168,28 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
                 authSteps = authSteps enable AuthSteps.SEND_KEY
                 bluetoothGatt.writeCharacteristic(characteristic)
             } else if (descriptor.value === BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE) {
-                Timber.e("SERVICES ${bluetoothGatt.services.map { it.uuid }}")
-                Timber.e("R_BASIC ${serviceOf(Services.BASIC)}")
                 val basicService = try {
                     bluetoothGatt[serviceOf(Services.BASIC)]
                 } catch (ex: Exception) {
                     Timber.e(ex)
                     throw ex
                 }
-                Timber.e("BASIC ${basicService}")
-                Timber.e("BASIC ${basicService.characteristics.map { it.uuid }}")
                 val basicCharacteristic =
                     basicService[characteristicOf(Characteristics.SENSOR_DATA)]
                 val eventCharacteristic = basicService[characteristicOf(Characteristics.EVENT)]
                 var result = bluetoothGatt.setCharacteristicNotification(basicCharacteristic, true)
-                Timber.e("BASIC_MEASURE $result")
                 result = bluetoothGatt.setCharacteristicNotification(eventCharacteristic, true)
-                Timber.e("EVENT_MEASURE $result")
-
                 val hrservice = bluetoothGatt[serviceOf(Services.HEART_RATE)]
                 val heartRateMeasure = hrservice[serviceOf(Characteristics.HEART_RATE_MEASURE)]
                 result = bluetoothGatt.setCharacteristicNotification(heartRateMeasure, true)
                 bluetoothGatt.writeDescriptor(heartRateMeasure.notifyDescriptor(true))
-                Timber.e("DESCRIPTOR $result")
             }
             serviceOf(Characteristics.HEART_RATE_MEASURE) -> {
                 val heartRateCharacteristic = bluetoothGatt.createHearRateCharacteristic()
                 var result =
                     bluetoothGatt.setCharacteristicNotification(heartRateCharacteristic, true)
-                Timber.e("HEART_RATE_MEASURE $result")
-
                 heartRateCharacteristic.value = Command.HEART_STOP_MANUAL
                 result = bluetoothGatt.writeCharacteristic(heartRateCharacteristic)
-                Timber.e("STOP_MANUAL $result")
             }
         }
     }
@@ -236,9 +206,7 @@ class Mi2HeartRateMonitor constructor() : HeartRateMonitor {
     }
 
     private fun aesEncrypt(message: ByteArray, secret: ByteArray): ByteArray {
-        Timber.e("RANDOM ${secret.toList()}")
         encrypter.init(Cipher.ENCRYPT_MODE, SecretKeySpec(secret, "AES"))
-        Timber.e("RANDOM_1 ${message.toList()}")
         return encrypter.doFinal(message)
     }
 

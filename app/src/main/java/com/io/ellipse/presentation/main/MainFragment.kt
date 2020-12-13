@@ -144,7 +144,6 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
     }
 
     private fun onHeartRateChanged(rate: HeartRateData) {
-        Timber.e("$rate")
         lastHeartRateTextView.text = getString(R.string.placeholder_last_heart_rate, rate.heartRate)
     }
 }

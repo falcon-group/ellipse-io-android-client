@@ -1,19 +1,27 @@
 package com.io.ellipse.service
 
+import android.app.PendingIntent
 import android.app.Service
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.io.ellipse.R
 import com.io.ellipse.data.bluetooth.connection.*
 import com.io.ellipse.data.bluetooth.state.BluetoothStateManager
+import com.io.ellipse.data.network.http.JSON_SERIALIZER
+import com.io.ellipse.data.network.socket.ClosedState
+import com.io.ellipse.data.network.socket.FailureState
+import com.io.ellipse.data.network.socket.IdleState
+import com.io.ellipse.data.network.socket.NetworkSocketManager
 import com.io.ellipse.data.notification.AppNotificationManager
+import com.io.ellipse.data.persistence.database.entity.tracker.TrackerData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -25,15 +33,26 @@ class BluetoothReceiverService : Service() {
 
         private const val FLAG_START_SERVICE = 0x001
         private const val FLAG_STOP_SERVICE = 0x002
+        private const val FLAG_IS_URGENT = 0x003
 
         private const val KEY_FLAG = "service.flag"
         private const val KEY_DEVICE = "connection.device"
+        private const val KEY_IS_URGENT = "service.urgent"
+
+        private const val REQUEST_CODE = 312
 
         fun connect(context: Context, device: BluetoothDevice) = with(context) {
             val data = Intent(this, BluetoothReceiverService::class.java)
             data.putExtra(KEY_DEVICE, device)
             data.putExtra(KEY_FLAG, FLAG_START_SERVICE)
             ContextCompat.startForegroundService(context, data)
+        }
+
+        fun changeUrgentFlag(context: Context, isUrgent: Boolean): Intent {
+            val intent = Intent(context, BluetoothReceiverService::class.java)
+            intent.putExtra(KEY_FLAG, FLAG_IS_URGENT)
+            intent.putExtra(KEY_IS_URGENT, isUrgent)
+            return intent
         }
 
         fun disconnect(context: Context) = with(context) {
@@ -47,34 +66,44 @@ class BluetoothReceiverService : Service() {
     lateinit var appNotificationManager: AppNotificationManager
 
     @Inject
-    lateinit var bluetoothBluetoothConnectionManager: BluetoothConnectionManager
+    lateinit var bluetoothConnectionManager: BluetoothConnectionManager
 
     @Inject
     lateinit var bluetoothStateManager: BluetoothStateManager
 
+    @Inject
+    lateinit var networkSocketManager: NetworkSocketManager
+
+    private val isUrgent: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     private var connectionJob: Job? = null
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    private var trackerJob: Job? = null
 
-    override fun onCreate() {
-        super.onCreate()
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val flag = intent?.getIntExtra(KEY_FLAG, FLAG_STOP_SERVICE) ?: FLAG_STOP_SERVICE
         when (flag) {
             FLAG_START_SERVICE -> {
-                val device: BluetoothDevice? = intent?.getParcelableExtra(KEY_DEVICE)
-                connectionJob = device?.also {
+                val device: BluetoothDevice = intent?.getParcelableExtra(KEY_DEVICE)
+                    ?: return super.onStartCommand(intent, flags, startId).also { stopSelf() }
+                connectionJob?.cancel()
+                connectionJob = device.also {
                     val notification = appNotificationManager.createNotification()
                         .setContentTitle(getString(R.string.app_name))
                         .setSubText("Attempt to connect to ${it.address}")
                         .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .build()
                     startForeground(STATUS_NOTIFICATION_ID, notification)
+                }.let {
+                    connectInternally(it)
                 }
-                    ?.let { connectInternally(it) }
-                    ?: return super.onStartCommand(intent, flags, startId).also { stopSelf() }
+                trackerJob?.cancel()
+                trackerJob = startTrackingJob()
+            }
+            FLAG_IS_URGENT -> {
+                isUrgent.value = intent?.getBooleanExtra(KEY_IS_URGENT, false) ?: false
             }
             FLAG_STOP_SERVICE -> {
                 stopForeground(true)
@@ -90,15 +119,44 @@ class BluetoothReceiverService : Service() {
         val isEnabled = bluetoothStateManager.isBluetoothEnabled
         if (isEnabled) {
             withContext(Dispatchers.IO) {
-                bluetoothBluetoothConnectionManager.connect(device)
+                bluetoothConnectionManager.connect(device)
             }
-            bluetoothBluetoothConnectionManager.connectionState
+            bluetoothConnectionManager.connectionState
                 .flowOn(Dispatchers.IO)
-                .collect { proceedState(it) }
+                .combine(isUrgent) { state, isUrgent ->
+                    state to isUrgent
+                }
+                .collect { (state, isUrgent) -> proceedBlutoothDeviceState(state, isUrgent) }
         }
     }
 
-    private fun proceedState(connectionState: BluetoothState) {
+    private fun startTrackingJob() = GlobalScope.launch(Dispatchers.IO) {
+        networkSocketManager.state.map {
+            when (it) {
+                is IdleState, is FailureState, is ClosedState -> {
+                    networkSocketManager.connect()
+                    false
+                }
+                else -> {
+                    true
+                }
+            }
+        }.distinctUntilChanged().flatMapLatest {
+            when (it) {
+                true -> bluetoothConnectionManager.data
+                else -> flow { }
+            }
+        }.combine(isUrgent) { data, urgent ->
+            TrackerData(data.heartRate, urgent)
+        }.catch {
+            Timber.e(it)
+        }.collect {
+            val stringData: String = JSON_SERIALIZER.toJson(it)
+            networkSocketManager.send(stringData)
+        }
+    }
+
+    private fun proceedBlutoothDeviceState(connectionState: BluetoothState, isUrgent: Boolean) {
         val notification = when (connectionState) {
             is Connecting -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
@@ -108,8 +166,35 @@ class BluetoothReceiverService : Service() {
             is Connected -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
                 .setSubText("Connected to ${connectionState.device.address}")
+                .also {
+                    val action = if (isUrgent) {
+                        NotificationCompat.Action(
+                            null,
+                            getString(R.string.title_stop_urgent),
+                            PendingIntent.getService(
+                                this,
+                                REQUEST_CODE,
+                                changeUrgentFlag(this, false),
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+                        )
+                    } else {
+                        NotificationCompat.Action(
+                            null,
+                            getString(R.string.title_start_urgent),
+                            PendingIntent.getService(
+                                this,
+                                REQUEST_CODE,
+                                changeUrgentFlag(this, true),
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+                        )
+                    }
+                    it.addAction(action)
+                }
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
+
             is Disconnecting -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
                 .setSubText("Disconnecting to ${connectionState.device.address}")
@@ -132,6 +217,7 @@ class BluetoothReceiverService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        GlobalScope.launch(Dispatchers.IO) { bluetoothBluetoothConnectionManager.disconnect() }
+        connectionJob?.cancel()
+        GlobalScope.launch(Dispatchers.IO) { bluetoothConnectionManager.disconnect() }
     }
 }

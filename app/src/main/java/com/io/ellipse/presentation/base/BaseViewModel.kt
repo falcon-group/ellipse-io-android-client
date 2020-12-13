@@ -34,7 +34,6 @@ abstract class BaseViewModel : ViewModel() {
     suspend fun <T> proceed(block: suspend () -> T): T? = try {
         block()
     } catch (ex: Exception) {
-        Timber.e(ex)
         _errorState.send(Failure(error = ex))
         null
     }

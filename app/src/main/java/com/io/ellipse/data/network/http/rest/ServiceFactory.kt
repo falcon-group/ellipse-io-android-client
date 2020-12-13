@@ -1,10 +1,17 @@
 package com.io.ellipse.data.network.http.rest
 
 import com.io.ellipse.BuildConfig
+import com.io.ellipse.data.network.http.HEADER_AUTHORIZATION
+import com.io.ellipse.data.network.http.HEADER_AUTHORIZATION_BEARER
 import com.io.ellipse.data.network.http.JSON_SERIALIZER
 import com.io.ellipse.data.network.http.rest.auth.AuthInterceptor
 import com.io.ellipse.data.network.http.rest.auth.AuthenticatorImpl
+import com.io.ellipse.data.persistence.preferences.proto.auth.AuthPreferences
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -14,7 +21,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ServiceFactory @Inject constructor(
-    private val authInterceptor: AuthInterceptor
+    private val authInterceptor: AuthInterceptor,
+    private val authPreferences: AuthPreferences
 ) {
 
     companion object {
@@ -43,4 +51,16 @@ class ServiceFactory @Inject constructor(
     }
 
     fun <T> createService(clazz: Class<T>) = retrofit.create(clazz)
+
+    suspend fun createWebSocket(webSocketListener: WebSocketListener): WebSocket {
+        val auth = authPreferences.data.first()
+        val tokenValue = "$HEADER_AUTHORIZATION_BEARER ${auth.authorizationToken}"
+        return httpClient.newWebSocket(
+            Request.Builder()
+                .url("ws://elepsio.herokuapp.com/")
+                .header(HEADER_AUTHORIZATION, tokenValue)
+                .build(),
+            webSocketListener
+        )
+    }
 }

@@ -12,4 +12,5 @@
     <string name="title_search_devices">Search devices</string>
 
     <string name="content_dialog_enable_bluetooth">To handle your heart rate you should enable bluetooth</string>
+    <string name="title_stop_urgent">Stop urgent</string>
 </resources>

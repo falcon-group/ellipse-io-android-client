@@ -100,5 +100,5 @@ class BluetoothConnectionManager @Inject constructor(
         monitor.takeIf { status == BluetoothGatt.GATT_SUCCESS }?.onConnected(gatt)
     }
 
-    val data: Flow<HeartRateData> get() = monitor.data.also { Timber.e("$monitor") }
+    val data: Flow<HeartRateData> get() = monitor.data
 }

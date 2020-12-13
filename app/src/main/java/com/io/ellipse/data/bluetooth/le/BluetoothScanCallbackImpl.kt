@@ -26,9 +26,7 @@ class BluetoothScanCallbackImpl @Inject constructor() : ScanCallback() {
         _deviceActionsChannel.sendBlocking(ActionDeviceFound(device))
     }
 
-    override fun onScanFailed(errorCode: Int) {
-        Timber.e("CODE $errorCode")
-    }
+    override fun onScanFailed(errorCode: Int) = Unit
 
     override fun onBatchScanResults(results: MutableList<ScanResult>?) {
         val devices = results?.map { it.device }?.toSet() ?: emptySet()

@@ -92,9 +92,7 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
         viewModel.viewModelScope.launch(Dispatchers.IO) { viewModel.connect(item) }
     }
 
-    private fun observeConnectionState(state: BluetoothState) {
-        Timber.e(state.toString())
-    }
+    private fun observeConnectionState(state: BluetoothState) = Unit
 
     private fun observeDeviceState(state: ListAction) {
         when (state) {

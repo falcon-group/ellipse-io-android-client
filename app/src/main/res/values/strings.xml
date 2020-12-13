@@ -4,5 +4,6 @@
     <string name="channel_id" translatable="false">com.ellipse.notification</string>
     <string name="channel_name" translatable="false">Ellipse</string>
     <string name="channel_description" translatable="false">Default channel</string>
+    <string name="title_start_urgent">Start urgent</string>
 
 </resources>
