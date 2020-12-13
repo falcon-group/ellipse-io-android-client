@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="placeholder_last_heart_rate">Известный сердечный ритм %d</string>
+    <string name="placeholder_connecting">Соединение с %s</string>
+    <string name="placeholder_connected">Соединено с %s</string>
+    <string name="placeholder_disconnecting">Отсоединение от %s</string>
+    <string name="placeholder_disconnected">Отключено от %s</string>
+    <string name="placeholder_error_while_connecting">Произошла ошибка во время соединения с %s</string>
 </resources>

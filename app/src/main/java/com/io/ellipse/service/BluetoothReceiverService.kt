@@ -160,12 +160,12 @@ class BluetoothReceiverService : Service() {
         val notification = when (connectionState) {
             is Connecting -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
-                .setSubText("Connecting to ${connectionState.device.address}")
+                .setSubText(getString(R.string.placeholder_connecting, connectionState.device.address))
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
             is Connected -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
-                .setSubText("Connected to ${connectionState.device.address}")
+                .setSubText(getString(R.string.placeholder_connected, connectionState.device.address))
                 .also {
                     val action = if (isUrgent) {
                         NotificationCompat.Action(
@@ -194,20 +194,20 @@ class BluetoothReceiverService : Service() {
                 }
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
-
             is Disconnecting -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
-                .setSubText("Disconnecting to ${connectionState.device.address}")
+                .setSubText(getString(R.string.placeholder_disconnecting, connectionState.device.address))
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
             is Disconnected -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
+                .setSubText(getString(R.string.placeholder_disconnected, connectionState.device.address))
                 .setSubText("Disconnected to ${connectionState.device.address}")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
             is ErrorState -> appNotificationManager.createNotification()
                 .setContentTitle(getString(R.string.app_name))
-                .setSubText("Error while connecting to ${connectionState.device.address}")
+                .setSubText(getString(R.string.placeholder_error_while_connecting, connectionState.device.address))
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .build()
             else -> null

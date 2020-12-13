@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="placeholder_last_heart_rate">Last know heart rate %d</string>
+    <string name="placeholder_connecting">Connecting to %s</string>
+    <string name="placeholder_connected">Connected to %s</string>
+    <string name="placeholder_disconnected">Disconnected from %s</string>
+    <string name="placeholder_disconnecting">Disconnecting from %s</string>
+    <string name="placeholder_error_while_connecting">Error while connecting to %s</string>
 </resources>

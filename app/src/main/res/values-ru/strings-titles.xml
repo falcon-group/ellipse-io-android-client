@@ -14,4 +14,6 @@
     <string name="content_dialog_enable_bluetooth">
         Для мониторинга показателей здоровья вам необходимо включить блютуз и присоединиться к необходимому устройству
     </string>
+    <string name="title_start_urgent">Начать мониторинг</string>
+    <string name="title_stop_urgent">Остановить мониторинг</string>
 </resources>
