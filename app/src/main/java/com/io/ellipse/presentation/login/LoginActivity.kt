@@ -11,8 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LoginActivity : BaseActivity<BaseViewModel.EmptyViewModel>() {
-
-
+    
     companion object {
         fun newIntent(context: Context) = Intent(context, LoginActivity::class.java)
     }

@@ -6,7 +6,7 @@ import java.util.*
 data class NoteResponseBody(
     @SerializedName("_id") val id: String,
     @SerializedName("title") val title: String,
-    @SerializedName("content") val content: String,
+    @SerializedName("content") val content: String?,
     @SerializedName("updateDate") val updateDate: Date,
     @SerializedName("createDate") val createDate: Date
 )

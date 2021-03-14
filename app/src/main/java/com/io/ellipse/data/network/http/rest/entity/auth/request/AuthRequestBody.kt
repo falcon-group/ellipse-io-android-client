@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 
 data class AuthRequestBody(
-    @SerializedName("username")
+    @SerializedName("phone")
     val phone: String,
     @SerializedName("password")
     val password: String

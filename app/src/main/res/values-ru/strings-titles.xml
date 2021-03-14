@@ -7,13 +7,13 @@
     <string name="title_bluetooth">Bluetooth</string>
     <string name="title_bluetooth_turned_off">Bluetooth недоступен</string>
     <string name="title_network_turned_off">Нет доступа к интернету</string>
-    <string name="title_hardware_active">Синзронизация доступна</string>
+    <string name="title_hardware_active">Синхронизация доступна</string>
     <string name="title_dialog_enable_bluetooth">Необходим Bluetooth</string>
     <string name="title_search_devices">Поиск устройств</string>
 
     <string name="content_dialog_enable_bluetooth">
         Для мониторинга показателей здоровья вам необходимо включить блютуз и присоединиться к необходимому устройству
     </string>
-    <string name="title_start_urgent">Начать мониторинг</string>
-    <string name="title_stop_urgent">Остановить мониторинг</string>
+    <string name="title_start_urgent">Начать</string>
+    <string name="title_stop_urgent">Остановить</string>
 </resources>

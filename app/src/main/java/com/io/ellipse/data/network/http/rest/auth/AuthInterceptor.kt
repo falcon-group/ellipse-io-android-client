@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +18,7 @@ class AuthInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         val header = with(preferences.data.first()) {
+            Timber.e(preferences.data.toString())
             HEADER_AUTHORIZATION to "$HEADER_AUTHORIZATION_BEARER $authorizationToken"
         }
         val request = chain.request()

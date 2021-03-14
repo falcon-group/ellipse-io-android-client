@@ -9,7 +9,7 @@ interface AuthService {
 
     companion object {
 
-        private const val LOGIN_ENDPOINT = "/auth/login"
+        private const val LOGIN_ENDPOINT = "/api/user/login"
     }
 
     @POST(LOGIN_ENDPOINT)

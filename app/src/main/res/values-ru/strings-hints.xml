@@ -3,6 +3,6 @@
     <string name="hint_user_name">Телефон</string>
     <string name="hint_password">Пароль</string>
     <string name="hint_search">Поиск</string>
-    <string name="hint_title">Загаловок</string>
+    <string name="hint_title">Заголовок</string>
     <string name="hint_content">Содержание</string>
 </resources>

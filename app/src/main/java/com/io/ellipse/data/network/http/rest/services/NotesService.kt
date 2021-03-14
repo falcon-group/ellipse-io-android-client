@@ -9,7 +9,7 @@ interface NotesService {
 
     companion object {
 
-        private const val NOTES_ENDPOINT = "/user/notes"
+        private const val NOTES_ENDPOINT = "/api/user/notes"
     }
 
     @POST(NOTES_ENDPOINT)

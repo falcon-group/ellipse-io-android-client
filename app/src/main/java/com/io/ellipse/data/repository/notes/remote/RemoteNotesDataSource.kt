@@ -20,8 +20,8 @@ class RemoteNotesDataSource @Inject constructor(
 ) : BaseDataSource<NoteRequestBody, NoteResponseBody> {
 
     companion object {
-        private const val KEY_OFFSET = "offset"
-        private const val KEY_COUNT = "count"
+        private const val KEY_PAGE = "page"
+        private const val KEY_COUNT = "perPage"
         private const val KEY_QUERY = "query"
         private const val KEY_ORDER_BY = "orderBy"
         private const val VALUE_DESC = "desc"
@@ -52,7 +52,7 @@ class RemoteNotesDataSource @Inject constructor(
             }
             is PaginatedQuerySpec -> flow {
                 val args = mapOf(
-                    KEY_OFFSET to retrieveSpec.offset,
+                    KEY_PAGE to retrieveSpec.offset,
                     KEY_COUNT to retrieveSpec.limit,
                     KEY_ORDER_BY to VALUE_DESC,
                     KEY_QUERY to retrieveSpec.query
@@ -61,7 +61,7 @@ class RemoteNotesDataSource @Inject constructor(
             }
             is PaginatedSpec -> flow {
                 val args = mapOf(
-                    KEY_OFFSET to retrieveSpec.offset,
+                    KEY_PAGE to retrieveSpec.page,
                     KEY_COUNT to retrieveSpec.limit,
                     KEY_ORDER_BY to VALUE_DESC
                 )

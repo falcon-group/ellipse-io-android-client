@@ -69,9 +69,8 @@ class SyncWorker @WorkerInject constructor(
     }
 
     private suspend fun saveItems(page: Int, pageSize: Int) {
-        val offset = (page - 1) * pageSize
         val items = remoteNoteNotesDataSource
-            .retrieve(PaginatedSpec(offset, pageSize))
+            .retrieve(PaginatedSpec(page, pageSize))
             .map { list -> list.map { map(it) } }
             .first()
         localNoteNotesDataSource.create(items)

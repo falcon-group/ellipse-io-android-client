@@ -7,7 +7,7 @@ fun map(noteResponseBody: NoteResponseBody): NoteEntity = with(noteResponseBody)
     NoteEntity(
         id,
         title,
-        content,
+        content ?: "",
         updateDate,
         createDate
     )

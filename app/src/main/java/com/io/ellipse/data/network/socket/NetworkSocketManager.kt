@@ -1,76 +1,66 @@
 package com.io.ellipse.data.network.socket
 
-import com.io.ellipse.data.network.http.rest.ServiceFactory
+import com.google.gson.JsonObject
+import com.io.ellipse.BuildConfig
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import okio.ByteString
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NetworkSocketManager @Inject constructor(
-    private val serviceFactory: ServiceFactory
-) : WebSocket, WebSocketListener() {
+class NetworkSocketManager @Inject constructor() : Emitter.Listener {
 
-    private var delegatedWebSocket: WebSocket? = null
+    companion object {
+        private val URL = BuildConfig.API_URL + "customer"
+        private const val KEY_TOKEN = "token"
+        private const val KEY_HEART_RATE = "heartRate"
+        private const val KEY_EVENT_MONITOR = "monitor"
+        private const val KEY_EVENT_CONNECTED = "monitor"
+
+        private const val PATH = "/socket"
+    }
+
+    private var socket: Socket? = null
 
     private val _state: MutableStateFlow<NetworkSocketState> = MutableStateFlow(IdleState)
 
-    suspend fun connect() {
-        delegatedWebSocket = serviceFactory.createWebSocket(this)
+    suspend fun connect(token: String) {
+        socket = try {
+            val options = IO.Options()
+                .also { it.auth = mutableMapOf(KEY_TOKEN to token) }
+                .also { it.path = PATH }
+            IO.socket(URL, options)
+                .also { it.connect() }
+                .also { it.on(KEY_EVENT_CONNECTED, this) }
+                .also { _state.value = OpenedState() }
+        } catch (ex: Exception) {
+            _state.value = FailureState(ex)
+            null
+        }
     }
 
     val state: Flow<NetworkSocketState> = _state
 
-    override fun cancel() {
-        delegatedWebSocket?.cancel()
+    suspend fun send(heartRate: Int) {
+        val message = JsonObject()
+        message.addProperty(KEY_HEART_RATE, heartRate)
+        socket?.emit(KEY_EVENT_MONITOR, message.toString())
     }
 
-    override fun close(code: Int, reason: String?): Boolean {
-        return delegatedWebSocket?.close(code, reason) ?: false
+    suspend fun disconnect() {
+        try {
+            socket?.disconnect()
+            socket = null
+        } catch (ex: Exception) {
+            _state.value = FailureState(ex)
+        }
     }
 
-    override fun queueSize(): Long {
-        return delegatedWebSocket?.queueSize() ?: 0
-    }
-
-    override fun request(): Request {
-        return delegatedWebSocket!!.request()
-    }
-
-    override fun send(text: String): Boolean {
-        return delegatedWebSocket?.send(text) ?: false
-    }
-
-    override fun send(bytes: ByteString): Boolean {
-        return delegatedWebSocket?.send(bytes) ?: false
-    }
-
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        _state.value = OpenedState()
-    }
-
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        _state.value = EmittedState(byteString = bytes)
-    }
-
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        _state.value = EmittedState(string = text)
-    }
-
-    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        _state.value = ClosedState()
-    }
-
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        _state.value = ClosedState()
-    }
-
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        _state.value = FailureState(t)
+    override fun call(vararg args: Any?) {
+        Timber.e(args.joinToString())
     }
 }

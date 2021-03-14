@@ -10,6 +10,7 @@ import com.io.ellipse.data.bluetooth.device.ActionBondedDevices
 import com.io.ellipse.data.bluetooth.device.ActionDeviceFound
 import com.io.ellipse.data.bluetooth.device.BluetoothDeviceManager
 import com.io.ellipse.data.bluetooth.state.BluetoothStateManager
+import com.io.ellipse.data.bluetooth.v2.device.Mi2Supporter
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.bluetooth.device.action.DialogBluetoothAction
 import com.io.ellipse.presentation.bluetooth.device.action.DialogDescriptionAction
@@ -27,12 +28,14 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class DeviceViewModel @ViewModelInject constructor(
     private val bluetoothManager: BluetoothStateManager,
     private val deviceManager: BluetoothDeviceManager,
     private val connectManager: BluetoothConnectionManager,
-    private val bluetoothConnectionHelper: BluetoothConnectionHelper
+    private val bluetoothConnectionHelper: BluetoothConnectionHelper,
+    private val supporter: Mi2Supporter
 ) : BaseViewModel(), ActivityResultCallback<Map<String, Boolean>> {
 
     private val userActionChannel: BroadcastChannel<UserAction> =
@@ -84,7 +87,14 @@ class DeviceViewModel @ViewModelInject constructor(
     fun stopScan() = deviceManager.stopScan()
 
     fun connect(deviceVm: DeviceVM) {
-        bluetoothConnectionHelper.connect(deviceVm.device)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                supporter.connect(deviceVm.device)
+            }catch (ex: Exception) {
+                Timber.e(ex)
+            }
+        }
+//        bluetoothConnectionHelper.connect(deviceVm.device)
     }
 
     fun disconnect() = bluetoothConnectionHelper.disconnect()

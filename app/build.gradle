@@ -160,4 +160,10 @@ dependencies {
     /* Workers */
     implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    /* Socket io */
+    implementation 'com.hbb20:ccp:2.4.5'
+    implementation ('io.socket:socket.io-client:2.0.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }

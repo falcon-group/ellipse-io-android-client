@@ -1,7 +1,6 @@
 package com.io.ellipse.domain.usecase
 
 import com.io.ellipse.data.network.http.rest.entity.auth.request.AuthRequestBody
-import com.io.ellipse.data.network.http.rest.entity.auth.response.AuthResponseBody
 import com.io.ellipse.data.network.http.rest.services.AuthService
 import com.io.ellipse.data.persistence.preferences.proto.auth.AuthPreferences
 import javax.inject.Inject
@@ -14,19 +13,17 @@ class LoginUseCase @Inject constructor(
 ) {
 
     suspend fun authorize(username: String, password: String) {
-        val authBody: AuthResponseBody = authService.authenticate(
+        val (token, refresh) = authService.authenticate(
             AuthRequestBody(
                 username,
                 password
             )
         )
-        with(authBody) {
-            authPreferences.updateData {
-                it.newBuilderForType()
-                    .setAuthorizationToken(authorizationToken)
-                    .setRefreshToken(refreshToken ?: "")
-                    .build()
-            }
+        authPreferences.updateData {
+            it.newBuilderForType()
+                .setAuthorizationToken(token)
+                .setRefreshToken(refresh ?: "")
+                .build()
         }
     }
 }

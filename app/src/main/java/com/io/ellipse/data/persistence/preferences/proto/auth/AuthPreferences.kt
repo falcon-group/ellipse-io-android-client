@@ -7,7 +7,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AuthPreferences @Inject constructor(
     @ApplicationContext context: Context,
     serializer: AuthModelSerializer

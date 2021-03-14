@@ -11,7 +11,7 @@ data class RetrieveByIdSpec(val id: String) : RetrieveSpec()
 
 data class RetrieveLocallyInteractedSpec(val flag: Int) : RetrieveSpec()
 
-data class PaginatedSpec constructor(val offset: Int, val limit: Int) : RetrieveSpec()
+data class PaginatedSpec constructor(val page: Int, val limit: Int) : RetrieveSpec()
 
 data class PaginatedQuerySpec constructor(val query: String, val offset: Int, val limit: Int) : RetrieveSpec()
 
