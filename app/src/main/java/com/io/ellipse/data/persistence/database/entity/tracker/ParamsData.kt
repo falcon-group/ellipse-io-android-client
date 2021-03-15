@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "params")
 data class ParamsData(
-    @PrimaryKey @ColumnInfo(name = "id")
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id")
     val id: Int = 0,
     @ColumnInfo(name = "heartRate")
     val heartRate: Int,

@@ -22,6 +22,7 @@ class SyncParamsWorker @WorkerInject constructor(
             paramsDao.retrieveAll().first()
                 .map { map(it) }
                 .also { paramsService.create(it) }
+            paramsDao.deleteAll()
             Result.success()
         } catch (ex: Exception) {
             Result.failure()

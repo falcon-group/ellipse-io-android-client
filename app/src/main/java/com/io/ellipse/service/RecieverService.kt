@@ -24,6 +24,7 @@ import com.io.ellipse.data.bluetooth.state.ErrorState
 import com.io.ellipse.data.bluetooth.state.HeartRateState
 import com.io.ellipse.data.bluetooth.state.ReceiverState
 import com.io.ellipse.data.network.socket.NetworkSocketManager
+import com.io.ellipse.data.network.utils.isConnected
 import com.io.ellipse.data.notification.AppNotificationManager
 import com.io.ellipse.data.persistence.database.dao.ParamsDao
 import com.io.ellipse.data.persistence.database.entity.tracker.ParamsData
@@ -102,6 +103,8 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
 
     private var wakeLock: PowerManager.WakeLock? = null
 
+    private var view: ToggleButton? = null
+
     override fun onCreate() {
         super.onCreate()
         val notification = appNotificationManager.createNotification()
@@ -130,17 +133,19 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
                     ?.getParcelableExtra(KEY_DEVICE)
                     ?: return START_STICKY
                 GlobalScope.launch(Dispatchers.Main + connectionJob!!) {
-
                     device?.let { connectInternally(it) }
                 }
             }
-            FLAG_STOP_SERVICE -> GlobalScope.launch(Dispatchers.IO) {
-                rootJob.cancelAndJoin()
+            FLAG_STOP_SERVICE -> {
+                hideIfNeeded()
                 wakeLock?.takeIf { it.isHeld }?.release()
-                supporterFacade.disconnect()
-                networkSocketManager.disconnect()
-                stopForeground(true)
-                stopSelf()
+                GlobalScope.launch(Dispatchers.IO) {
+                    rootJob.cancelAndJoin()
+                    supporterFacade.disconnect()
+                    networkSocketManager.disconnect()
+                    stopForeground(true)
+                    stopSelf()
+                }
             }
             FLAG_IS_URGENT -> {
                 isUrgentState.value = !isUrgentState.value
@@ -151,6 +156,7 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        hideIfNeeded()
         wakeLock?.takeIf { it.isHeld }?.release()
         GlobalScope.launch(Dispatchers.IO) {
             supporterFacade.disconnect()
@@ -218,7 +224,16 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
         GlobalScope.launch(Dispatchers.Main + rootJob) {
             isUrgentState.collect { view.changeState(it, this@RecieverService) }
         }
+        this.view = view
         isShown = true
+    }
+
+    private fun hideIfNeeded() {
+        if (!isShown) {
+            return
+        }
+        val wm = getSystemService(WINDOW_SERVICE) as WindowManager
+        view?.let { wm.removeViewImmediate(it) }
     }
 
     private fun proceedError(device: BluetoothDevice, throwable: Throwable) {
@@ -232,9 +247,14 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
         appNotificationManager.showNotification(STATUS_NOTIFICATION_ID, notification)
     }
 
+    @Suppress("IMPLICIT_CAST_TO_ANY")
     private suspend fun sendData(heartRate: Int, isUrgent: Boolean) = withContext(Dispatchers.IO) {
         try {
-            networkSocketManager.send(heartRate, isUrgent)
+            if (isConnected) {
+                networkSocketManager.send(heartRate, isUrgent)
+            } else {
+                paramsDao.create(ParamsData(heartRate = heartRate, isUrgent = isUrgent))
+            }
         } catch (ex: Exception) {
             paramsDao.create(ParamsData(heartRate = heartRate, isUrgent = isUrgent))
         }

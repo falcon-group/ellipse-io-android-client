@@ -1,7 +1,9 @@
 package com.io.ellipse.data.network.socket
 
+import androidx.core.content.ContextCompat
 import com.google.gson.JsonObject
 import com.io.ellipse.BuildConfig
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter

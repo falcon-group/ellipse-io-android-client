@@ -11,7 +11,7 @@ import com.io.ellipse.data.persistence.database.entity.tracker.ParamsData
 
 @Database(
     entities = [NoteEntity::class, ParamsData::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(DateConverters::class)
