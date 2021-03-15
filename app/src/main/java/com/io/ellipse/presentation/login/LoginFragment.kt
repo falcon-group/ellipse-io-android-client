@@ -62,6 +62,7 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
     }
 
     private fun initTextInputs() {
+        countryPicker.registerCarrierNumberEditText(usernameEditText)
         usernameTextWatcher = usernameEditText.addTextChangedListener {
             viewModel.validateUsername(it?.toString() ?: "")
         }
@@ -84,7 +85,7 @@ class LoginFragment : BaseFragment<LoginViewModel>() {
     }
 
     private fun authorize() = execute(Dispatchers.IO) {
-        viewModel.authorize(usernameEditText.text.toString(), passwordEditText.text.toString())
+        viewModel.authorize(countryPicker.fullNumber, passwordEditText.text.toString())
     }
 
     private fun observeUsernameError(failure: Failure?) {

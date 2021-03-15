@@ -14,7 +14,7 @@ class ApplicationStateUseCase @Inject constructor(
 ) {
 
     fun subscribeForApplicationState() = networkStateManager.isNetworkAvailable
-        .combine(bluetoothStateManager.bluetoothState) { network, bluetooth -> network to bluetooth }
+        .combine(bluetoothStateManager.subscribeState()) { network, bluetooth -> network to bluetooth }
         .map { (network, bluetooth) ->
             return@map if (!network) {
                 NetworkDisabledState

@@ -7,7 +7,6 @@ import com.io.ellipse.domain.usecase.SessionExistenceUseCase
 import com.io.ellipse.presentation.base.BaseViewModel
 import com.io.ellipse.presentation.splash.navigation.LoginNavigation
 import com.io.ellipse.presentation.splash.navigation.MainNavigation
-import com.io.ellipse.presentation.splash.navigation.OverlaySettingsNavigation
 import com.io.ellipse.workers.WorkersManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
@@ -17,16 +16,11 @@ import kotlinx.coroutines.flow.onEach
 
 class SplashViewModel @ViewModelInject constructor(
     private val sessionExistenceUseCase: SessionExistenceUseCase,
-    private val workersManager: WorkersManager,
-    private val appOverlayManager: AppOverlayManager
+    private val workersManager: WorkersManager
 ) : BaseViewModel() {
 
     init {
-        if (appOverlayManager.canDrawOverlays) {
-            navigateToNextScreen()
-        } else {
-            _navigationState.offer(OverlaySettingsNavigation())
-        }
+        navigateToNextScreen()
     }
 
     fun navigateToNextScreen() {
@@ -35,7 +29,6 @@ class SplashViewModel @ViewModelInject constructor(
             .map {
                 when (it) {
                     true -> {
-                        workersManager.startSynchronizingWork()
                         MainNavigation()
                     }
                     else -> LoginNavigation()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="TextInputStyle">
-        <item name="boxCornerRadiusTopEnd">@dimen/default_corner_radius</item>
+    <style name="TextInputStyle" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">@dimen/default_corner_radius</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/default_corner_radius</item>
     </style>
 </resources>

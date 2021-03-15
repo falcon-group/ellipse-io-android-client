@@ -2,18 +2,13 @@ package com.io.ellipse.di
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanSettings
 import android.content.Context
-import android.os.ParcelUuid
-import com.io.ellipse.data.bluetooth.connection.support.HeartRateMonitor
-import com.io.ellipse.data.bluetooth.connection.support.mi.v2.Mi2HeartRateMonitor
+import android.location.LocationManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.*
 import javax.inject.Singleton
 
 @Module
@@ -29,6 +24,12 @@ class BluetoothModule {
     fun bluetoothAdapter(@ApplicationContext context: Context): BluetoothAdapter {
         val service = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         return service.adapter
+    }
+
+    @Provides
+    @Singleton
+    fun locationManager(@ApplicationContext context: Context): LocationManager {
+        return context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
 }

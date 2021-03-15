@@ -1,11 +1,15 @@
 package com.io.ellipse.presentation.bluetooth.device
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -15,23 +19,15 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.io.ellipse.R
 import com.io.ellipse.common.android.list.OnItemClickListener
 import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
-import com.io.ellipse.data.bluetooth.connection.BluetoothState
 import com.io.ellipse.data.bluetooth.state.requestBluetooth
 import com.io.ellipse.presentation.base.BaseFragment
-import com.io.ellipse.presentation.bluetooth.device.action.DialogBluetoothAction
-import com.io.ellipse.presentation.bluetooth.device.action.DialogDescriptionAction
-import com.io.ellipse.presentation.bluetooth.device.action.DialogPermissionsAction
-import com.io.ellipse.presentation.bluetooth.device.action.UserAction
-import com.io.ellipse.presentation.bluetooth.device.utils.ActionUpsertItem
-import com.io.ellipse.presentation.bluetooth.device.utils.ListAction
+import com.io.ellipse.presentation.bluetooth.device.action.*
 import com.io.ellipse.presentation.bluetooth.device.utils.adapter.DeviceVM
 import com.io.ellipse.presentation.bluetooth.device.utils.adapter.DevicesAdapter
-import com.io.ellipse.presentation.bluetooth.device.utils.checkBluetoothPermissions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_devices.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<DeviceVM> {
@@ -40,7 +36,9 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
 
     override val layoutResId: Int = R.layout.fragment_devices
 
+    private var scannerLiveData: LiveData<DeviceVM>? = null
     private val adapter = DevicesAdapter(this)
+
     private lateinit var requestMultiplePermissions: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,38 +47,34 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
             ActivityResultContracts.RequestMultiplePermissions(),
             viewModel
         )
-        var isFlowEnabled = checkBluetoothPermissions()
-        if (!isFlowEnabled) {
-            viewModel.showDescriptionDialog()
-            return
-        }
-        isFlowEnabled = viewModel.isBluetoothEnabled
-        if (!isFlowEnabled) {
-            viewModel.showBluetoothDialog()
-            return
-        }
-        viewModel.startScan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val margin = requireContext().resources.getDimensionPixelSize(R.dimen.margin_small)
+        val dividerDecoration = DividerItemDecoration(
+            requireContext(),
+            DividerItemDecoration.VERTICAL
+        )
         devicesRecyclerView.adapter = adapter
         devicesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         devicesRecyclerView.addItemDecoration(GridItemMarginDecoration(margin, margin, 1))
-        devicesRecyclerView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
-        viewModel.connectionState
-            .asLiveData(Dispatchers.IO)
-            .observe(viewLifecycleOwner, Observer(::observeConnectionState))
-        viewModel.deviceAction
-            .asLiveData(Dispatchers.IO)
-            .observe(viewLifecycleOwner, Observer(::observeDeviceState))
+        devicesRecyclerView.addItemDecoration(dividerDecoration)
         viewModel.userActionState
             .asLiveData(Dispatchers.IO)
             .observe(viewLifecycleOwner, Observer(::observeBluetoothAction))
-        viewModel.bluetoothState
-            .asLiveData(Dispatchers.IO)
-            .observe(viewLifecycleOwner, Observer(::observeBluetoothState))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        scannerLiveData = viewModel.startScan().also {
+            it.observe(viewLifecycleOwner, Observer(::upsertDevice))
+        }
+    }
+
+    override fun onPause() {
+        scannerLiveData?.removeObservers(viewLifecycleOwner)
+        super.onPause()
     }
 
     override fun onDestroy() {
@@ -92,27 +86,12 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
         viewModel.viewModelScope.launch(Dispatchers.IO) { viewModel.connect(item) }
     }
 
-    private fun observeConnectionState(state: BluetoothState) = Unit
-
-    private fun observeDeviceState(state: ListAction) {
-        when (state) {
-            is ActionUpsertItem -> upsertDevice(state.device)
-        }
-    }
-
-    private fun observeBluetoothState(state: Boolean) {
-        if (state) {
-            viewModel.startScan()
-        } else if (checkBluetoothPermissions()) {
-//            viewModel.stopScan()
-        }
-    }
-
     private fun observeBluetoothAction(action: UserAction) {
         when (action) {
             is DialogDescriptionAction -> showDescriptionDialog()
             is DialogPermissionsAction -> showPermissionDialogs()
             is DialogBluetoothAction -> showBluetoothDialog()
+            is DialogLocationAction -> showLocationEnablingScreen()
         }
     }
 
@@ -134,14 +113,19 @@ class DeviceFragment : BaseFragment<DeviceViewModel>(), OnItemClickListener<Devi
 
     private fun showPermissionDialogs() {
         val permissions = arrayOf(
+            Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.BLUETOOTH
         )
         requestMultiplePermissions.launch(permissions)
     }
 
     private fun showBluetoothDialog() = requestBluetooth()
+
+    private fun showLocationEnablingScreen() {
+        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+    }
 
     private fun upsertDevice(deviceVM: DeviceVM) {
         val index = adapter.items.indexOfFirst { it.address == deviceVM.address }

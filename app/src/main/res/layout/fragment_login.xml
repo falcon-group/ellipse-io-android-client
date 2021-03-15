@@ -7,11 +7,11 @@
 
     <androidx.constraintlayout.helper.widget.Flow
         android:id="@+id/inputsFlow"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/padding_large"
         android:paddingEnd="@dimen/padding_large"
-        app:constraint_referenced_ids="usernameInputLayout, passwordInputLayout"
+        app:constraint_referenced_ids="userNameLayout, passwordInputLayout"
         app:flow_horizontalAlign="center"
         app:flow_horizontalBias="0"
         app:flow_maxElementsWrap="1"
@@ -23,26 +23,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/usernameInputLayout"
-        style="@style/TextInputStyle"
+    <LinearLayout
+        android:id="@+id/userNameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/hint_user_name">
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/usernameEditText"
-            android:layout_width="match_parent"
+        <com.hbb20.CountryCodePicker
+            android:id="@+id/countryPicker"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textSize="@dimen/big_text_size" />
+            app:ccp_autoFormatNumber="true"
+            app:ccp_padding="0dp"
+            app:ccp_showNameCode="false" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/usernameInputLayout"
+            style="@style/TextInputStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/hint_user_name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/usernameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="@dimen/big_text_size" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordInputLayout"
         style="@style/TextInputStyle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/hint_password"
         tools:ignore="MissingConstraints">

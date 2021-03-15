@@ -22,10 +22,16 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun database(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME).build()
+        return Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
     @Singleton
     fun notesDao(database: AppDatabase) = database.notesDao
+
+    @Provides
+    @Singleton
+    fun paramsDao(database: AppDatabase) = database.paramsDao
 }

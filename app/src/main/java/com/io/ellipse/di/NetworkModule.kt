@@ -6,6 +6,7 @@ import android.os.Build
 import com.io.ellipse.data.network.http.rest.ServiceFactory
 import com.io.ellipse.data.network.http.rest.services.AuthService
 import com.io.ellipse.data.network.http.rest.services.NotesService
+import com.io.ellipse.data.network.http.rest.services.ParamsService
 import com.io.ellipse.data.network.state.NetworkStateManager
 import com.io.ellipse.data.network.state.NetworkTracker
 import com.io.ellipse.data.network.state.impl.NetworkTrackerCompat
@@ -31,6 +32,12 @@ class NetworkModule {
     @Singleton
     fun provideNotesService(serviceFactory: ServiceFactory): NotesService {
         return serviceFactory.createService(NotesService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideParamsService(serviceFactory: ServiceFactory): ParamsService {
+        return serviceFactory.createService(ParamsService::class.java)
     }
 
     @Provides

@@ -15,8 +15,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.io.ellipse.R
 import com.io.ellipse.common.android.list.decorations.GridItemMarginDecoration
-import com.io.ellipse.common.android.list.decorations.PositionMarginDecoration
-import com.io.ellipse.data.bluetooth.connection.HeartRateData
 import com.io.ellipse.data.persistence.database.entity.note.NoteEntity
 import com.io.ellipse.domain.usecase.main.ApplicationState
 import com.io.ellipse.domain.usecase.main.BluetoothDisabledState
@@ -36,6 +34,7 @@ import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -87,11 +86,17 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
         }
         search(queryEditText.text.toString())
         viewModel.subscribeAppState()
-            .asLiveData(Dispatchers.IO)
+            .asLiveData(viewModel.viewModelScope.coroutineContext)
             .observe(viewLifecycleOwner, Observer(::onApplicationStateChange))
         viewModel.subscribeForHeartRate()
-            .asLiveData(Dispatchers.IO)
+            .onEach { Timber.e("$it") }
+            .asLiveData(viewModel.viewModelScope.coroutineContext)
             .observe(viewLifecycleOwner, Observer(::onHeartRateChanged))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkPermissions()
     }
 
     override fun onDestroyView() {
@@ -143,7 +148,7 @@ class MainFragment : BaseFragment<MainViewModel>(), OnNoteInteractListener {
         appStateTextView.text = getString(text)
     }
 
-    private fun onHeartRateChanged(rate: HeartRateData) {
-        lastHeartRateTextView.text = getString(R.string.placeholder_last_heart_rate, rate.heartRate)
+    private fun onHeartRateChanged(rate: Int) {
+        lastHeartRateTextView.text = getString(R.string.placeholder_last_heart_rate, rate)
     }
 }

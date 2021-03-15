@@ -13,8 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class LoginViewModel @ViewModelInject constructor(
-    private val loginUseCase: LoginUseCase,
-    private val workersManager: WorkersManager
+    private val loginUseCase: LoginUseCase
 ) : BaseViewModel() {
 
     companion object {
@@ -44,7 +43,6 @@ class LoginViewModel @ViewModelInject constructor(
 
     suspend fun authorize(username: String, password: String) = proceed {
         loginUseCase.authorize(username, password)
-        workersManager.startSynchronizingWork()
         _navigationState.send(MainNavigation())
     }
 }

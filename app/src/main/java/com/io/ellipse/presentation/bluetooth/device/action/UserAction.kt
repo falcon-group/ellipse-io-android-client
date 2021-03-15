@@ -7,3 +7,5 @@ object DialogDescriptionAction: UserAction()
 object DialogPermissionsAction: UserAction()
 
 object DialogBluetoothAction: UserAction()
+
+object DialogLocationAction: UserAction()
