@@ -35,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:ccp_autoFormatNumber="true"
+            app:ccp_defaultNameCode="UA"
             app:ccp_padding="0dp"
             app:ccp_showNameCode="false" />
 
