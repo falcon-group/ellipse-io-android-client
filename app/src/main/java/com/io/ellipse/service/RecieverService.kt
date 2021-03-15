@@ -34,6 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -233,7 +234,11 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
             return
         }
         val wm = getSystemService(WINDOW_SERVICE) as WindowManager
-        view?.let { wm.removeViewImmediate(it) }
+        try {
+            view?.let { wm.removeViewImmediate(it) }
+        } catch (ex: Exception) {
+            Timber.e(ex)
+        }
     }
 
     private fun proceedError(device: BluetoothDevice, throwable: Throwable) {
