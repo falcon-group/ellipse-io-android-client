@@ -186,10 +186,17 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
         emit(ErrorState(it))
     }.combine(isUrgentState) { state, isUrgent ->
         state to isUrgent
-    }.collect { (state, isUrgent) ->
+    }.transformLatest {
+        while (true) {
+            emit(it)
+            delay(2500)
+        }
+    }.sample(5000).collect { (state, isUrgent) ->
         when (state) {
             is ErrorState -> proceedError(device, state.throwable)
-            is HeartRateState -> sendData(state.heartRate, isUrgent)
+            is HeartRateState -> if (state.heartRate > 20) {
+                sendData(state.heartRate, isUrgent)
+            }
         }
     }
 

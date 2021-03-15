@@ -57,6 +57,7 @@ class NetworkSocketManager @Inject constructor() : Emitter.Listener {
         val message = JsonObject()
         message.addProperty(KEY_HEART_RATE, heartRate)
         message.addProperty(KEY_IS_URGENT, isUrgent)
+        Timber.e(message.toString())
         socket?.emit(KEY_EVENT_MONITOR, message.toString())
     }
 

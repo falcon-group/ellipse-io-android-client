@@ -28,7 +28,6 @@ class AppBackgroundManager @Inject constructor(@ApplicationContext private val c
         }
 
     fun requestPermission() {
-        Timber.e("REQUEST IGNORE BATTERY")
         val intent = Intent(
             Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
             Uri.parse(SCHEMA_PACKAGE + context.packageName)
