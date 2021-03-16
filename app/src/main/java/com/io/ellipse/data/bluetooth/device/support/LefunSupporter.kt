@@ -6,7 +6,9 @@ import com.io.ellipse.data.bluetooth.gatt.GattClientManager
 import com.io.ellipse.data.bluetooth.gatt.utils.get
 import com.io.ellipse.data.bluetooth.gatt.utils.id
 import com.io.ellipse.data.bluetooth.gatt.utils.isNotificationEnabled
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.transformLatest
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.inject.Inject
@@ -52,21 +54,27 @@ class LefunSupporter @Inject constructor(
         val notifyCharacteristic = mainService[NOTIFY_CHARACTERISTIC]!!
         var isHandled = false
         val subscription = client.subscribe(notifyCharacteristic)
-        subscription.data.collect {
-            isHandled = if (isHandled) {
-                // check package size
-                require(it.isPackageSizeAppropriate()) { "Response is too short" }
-                // check whether package is Holistic
-                if (it.isPackageHolistic()) {
-                    block(deserializePackage(it))
-                    writeCharacteristic.value = HRCMD
-                    client.writeCharacteristic(writeCharacteristic)
+        subscription.data
+            .transformLatest {
+                while (true) {
+                    emit(it)
+                    delay(2500)
                 }
-                false
-            } else {
-                true
+            }.collect {
+                isHandled = if (isHandled) {
+                    // check package size
+                    require(it.isPackageSizeAppropriate()) { "Response is too short" }
+                    // check whether package is Holistic
+                    if (it.isPackageHolistic()) {
+                        block(deserializePackage(it))
+                        writeCharacteristic.value = HRCMD
+                        client.writeCharacteristic(writeCharacteristic)
+                    }
+                    false
+                } else {
+                    true
+                }
             }
-        }
     }
 
     private fun deserializePackage(byteArray: ByteArray): Int {

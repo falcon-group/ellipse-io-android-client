@@ -49,7 +49,6 @@ fun ToggleButton.changeState(state: Boolean, listener: CompoundButton.OnCheckedC
 fun WindowManager.createDefaultParams(width: Int, height: Int): WindowManager.LayoutParams {
     var flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
     flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-    flags = flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
     flags = flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
     flags = flags or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
     flags = flags or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
