@@ -15,4 +15,4 @@ fun map(noteResponseBody: NoteResponseBody): NoteEntity = with(noteResponseBody)
     )
 }
 
-fun map(paramsData: ParamsData): ParamsBody = with(paramsData) { ParamsBody(heartRate, isUrgent) }
+fun map(paramsData: ParamsData): ParamsBody = with(paramsData) { ParamsBody(heartRate, isUrgent, createDate) }

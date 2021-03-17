@@ -3,6 +3,7 @@ package com.io.ellipse.data.persistence.database.entity.tracker
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.*
 
 @Entity(tableName = "params")
 data class ParamsData(
@@ -11,5 +12,7 @@ data class ParamsData(
     @ColumnInfo(name = "heartRate")
     val heartRate: Int,
     @ColumnInfo(name = "isUrgent")
-    val isUrgent: Boolean
+    val isUrgent: Boolean,
+    @ColumnInfo(name = "createDate")
+    val createDate: Date
 )

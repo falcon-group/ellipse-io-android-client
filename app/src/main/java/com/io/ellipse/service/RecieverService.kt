@@ -30,11 +30,13 @@ import com.io.ellipse.data.persistence.database.dao.ParamsDao
 import com.io.ellipse.data.persistence.database.entity.tracker.ParamsData
 import com.io.ellipse.data.persistence.preferences.proto.auth.AuthPreferences
 import com.io.ellipse.data.utils.AppOverlayManager
+import com.io.ellipse.data.utils.toUTC
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 
@@ -256,14 +258,27 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
     private suspend fun sendData(heartRate: Int, isUrgent: Boolean) = withContext(Dispatchers.IO) {
+        val date = Date().toUTC()
         try {
             if (isConnected) {
                 networkSocketManager.send(heartRate, isUrgent)
             } else {
-                paramsDao.create(ParamsData(heartRate = heartRate, isUrgent = isUrgent))
+                paramsDao.create(
+                    ParamsData(
+                        heartRate = heartRate,
+                        isUrgent = isUrgent,
+                        createDate = date
+                    )
+                )
             }
         } catch (ex: Exception) {
-            paramsDao.create(ParamsData(heartRate = heartRate, isUrgent = isUrgent))
+            paramsDao.create(
+                ParamsData(
+                    heartRate = heartRate,
+                    isUrgent = isUrgent,
+                    createDate = date
+                )
+            )
         }
     }
 

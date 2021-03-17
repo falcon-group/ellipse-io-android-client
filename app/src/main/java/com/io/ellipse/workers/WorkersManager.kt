@@ -25,19 +25,15 @@ class WorkersManager @Inject constructor(@ApplicationContext context: Context) {
         manager.enqueue(syncWorkRequest)
     }
 
-    fun startSynchronizingParamWork() {
+    fun startSynchronizingParamWork(delay: Long = 0, unit: TimeUnit = TimeUnit.MILLISECONDS) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val syncWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequestBuilder<SyncWorker>(DURATION_IN_DAYS, TimeUnit.DAYS)
+        val syncWorkRequest: OneTimeWorkRequest = OneTimeWorkRequestBuilder<SyncParamsWorker>()
+                .setInitialDelay(delay, unit)
                 .setConstraints(constraints)
                 .build()
-        manager.enqueueUniquePeriodicWork(
-            PERIODICAL_WORK,
-            ExistingPeriodicWorkPolicy.REPLACE,
-            syncWorkRequest
-        )
+        manager.enqueueUniqueWork(PERIODICAL_WORK, ExistingWorkPolicy.REPLACE, syncWorkRequest)
     }
 
     fun cancelPeriodicalWork() {

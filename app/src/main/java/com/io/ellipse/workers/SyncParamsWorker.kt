@@ -9,16 +9,18 @@ import com.io.ellipse.data.map
 import com.io.ellipse.data.network.http.rest.services.ParamsService
 import com.io.ellipse.data.persistence.database.dao.ParamsDao
 import kotlinx.coroutines.flow.first
+import java.util.concurrent.TimeUnit
 
 class SyncParamsWorker @WorkerInject constructor(
     @Assisted context: Context,
     @Assisted workerParameters: WorkerParameters,
     private val paramsService: ParamsService,
-    private val paramsDao: ParamsDao
+    private val paramsDao: ParamsDao,
+    private val workersManager: WorkersManager
 ) : CoroutineWorker(context, workerParameters) {
 
     override suspend fun doWork(): Result {
-        return try {
+        val result =  try {
             paramsDao.retrieveAll().first()
                 .map { map(it) }
                 .also { paramsService.create(it) }
@@ -27,5 +29,7 @@ class SyncParamsWorker @WorkerInject constructor(
         } catch (ex: Exception) {
             Result.failure()
         }
+        workersManager.startSynchronizingParamWork(2L, TimeUnit.HOURS)
+        return result
     }
 }
