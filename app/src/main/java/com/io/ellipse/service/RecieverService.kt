@@ -176,6 +176,7 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
     }
 
     private suspend fun connectInternally(device: BluetoothDevice) = channelFlow<ReceiverState> {
+        supporterFacade.disconnect()
         supporterFacade.connectAndReceive(device) { send(HeartRateState(it)) }
         awaitClose { }
     }.flowOn(Dispatchers.IO).retry {

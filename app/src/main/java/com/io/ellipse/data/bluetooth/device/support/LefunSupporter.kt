@@ -7,8 +7,8 @@ import com.io.ellipse.data.bluetooth.gatt.utils.get
 import com.io.ellipse.data.bluetooth.gatt.utils.id
 import com.io.ellipse.data.bluetooth.gatt.utils.isNotificationEnabled
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.*
+import timber.log.Timber
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.inject.Inject
@@ -55,25 +55,32 @@ class LefunSupporter @Inject constructor(
         var isHandled = false
         val subscription = client.subscribe(notifyCharacteristic)
         subscription.data
+            .onEach {
+                isHandled = if (isHandled) {
+                    // check whether package is Holistic
+                    Timber.e("MESSAGE ${it.asList()}")
+                    writeCharacteristic.value = HRCMD
+                    client.writeCharacteristic(writeCharacteristic)
+                    false
+                } else {
+                    true
+                }
+            }
+            .map {
+                require(it.isPackageSizeAppropriate()) { "Response is too short" }
+                deserializePackage(it)
+            }
+            .filter {
+                it > 20
+            }
             .transformLatest {
                 while (true) {
                     emit(it)
                     delay(2500)
                 }
-            }.collect {
-                isHandled = if (isHandled) {
-                    // check package size
-                    require(it.isPackageSizeAppropriate()) { "Response is too short" }
-                    // check whether package is Holistic
-                    if (it.isPackageHolistic()) {
-                        block(deserializePackage(it))
-                        writeCharacteristic.value = HRCMD
-                        client.writeCharacteristic(writeCharacteristic)
-                    }
-                    false
-                } else {
-                    true
-                }
+            }
+            .collect {
+                block(it)
             }
     }
 

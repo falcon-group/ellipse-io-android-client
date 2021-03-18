@@ -11,10 +11,6 @@ import java.nio.channels.NotYetBoundException
 
 class AuthenticatorImpl constructor(serviceFactory: ServiceFactory) : Authenticator {
 
-    private val authService: AuthService by lazy {
-        serviceFactory.createService(AuthService::class.java)
-    }
-
     override fun authenticate(route: Route?, response: Response): Request? = runBlocking {
         null
     }
