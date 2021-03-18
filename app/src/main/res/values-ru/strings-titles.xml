@@ -16,4 +16,6 @@
     </string>
     <string name="title_start_urgent">Начать</string>
     <string name="title_stop_urgent">Остановить</string>
+    <string name="message_connection_started">Соединение успешно</string>
+    <string name="title_device_connected">Соединено с %s</string>
 </resources>

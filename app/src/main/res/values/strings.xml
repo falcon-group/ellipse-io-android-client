@@ -5,4 +5,5 @@
     <string name="channel_name" translatable="false">Ellipse</string>
     <string name="channel_description" translatable="false">Default channel</string>
     <string name="message_connection_started">Connection started</string>
+    <string name="title_device_connected">Device connected %s</string>
 </resources>

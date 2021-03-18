@@ -198,6 +198,8 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
         emit(ErrorState(it))
     }.combine(isUrgentState) { state, isUrgent ->
         state to isUrgent
+    }.catch {
+        emit(ErrorState(it) to false)
     }.sample(5000).collect { (state, isUrgent) ->
         when (state) {
             is ErrorState -> proceedError(device, state.throwable)
@@ -264,6 +266,8 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
             .addAction(0, getString(android.R.string.cancel), createPendingIntent())
             .build()
         appNotificationManager.showNotification(STATUS_NOTIFICATION_ID, notification)
+        stopForeground(false)
+        stopSelf()
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
