@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
@@ -19,6 +20,7 @@ import com.io.ellipse.common.android.changeState
 import com.io.ellipse.common.android.createDefaultParams
 import com.io.ellipse.common.android.vibrate
 import com.io.ellipse.data.bluetooth.device.core.SupporterFacade
+import com.io.ellipse.data.bluetooth.gatt.GattClientManager
 import com.io.ellipse.data.bluetooth.gatt.exceptions.GattConnectionException
 import com.io.ellipse.data.bluetooth.state.ErrorState
 import com.io.ellipse.data.bluetooth.state.HeartRateState
@@ -83,6 +85,9 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
 
     @Inject
     lateinit var supporterFacade: SupporterFacade
+
+    @Inject
+    lateinit var gattClientManager: GattClientManager
 
     @Inject
     lateinit var networkSocketManager: NetworkSocketManager
@@ -185,6 +190,10 @@ class RecieverService : Service(), CompoundButton.OnCheckedChangeListener {
         val token = authPreferences.data.first().authorizationToken
         networkSocketManager.disconnect()
         networkSocketManager.connect(token)
+    }.onEach {
+        if (!gattClientManager.hasConnection) {
+            throw GattConnectionException()
+        }
     }.flowOn(Dispatchers.IO).catch {
         emit(ErrorState(it))
     }.combine(isUrgentState) { state, isUrgent ->

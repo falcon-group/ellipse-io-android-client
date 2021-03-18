@@ -17,7 +17,8 @@ import kotlin.coroutines.Continuation
 
 @Singleton
 class GattClientManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val bluetoothManager: BluetoothManager
 ) {
 
     companion object {
@@ -91,6 +92,9 @@ class GattClientManager @Inject constructor(
             gatt?.writeDescriptor(descriptor)
         }
     }
+
+    val hasConnection: Boolean
+        get() = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT).isNotEmpty()
 
     fun subscribe(characteristic: BluetoothGattCharacteristic): SubscriptionRequestProcessor {
         val processor = SubscriptionRequestProcessor(characteristic)

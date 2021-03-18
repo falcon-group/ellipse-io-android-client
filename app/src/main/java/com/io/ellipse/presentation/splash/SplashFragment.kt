@@ -15,12 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SplashFragment : BaseFragment<SplashViewModel>() {
 
-    private var resultLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        viewModel.navigateToNextScreen()
-    }
-
     override val viewModel: SplashViewModel by viewModels()
 
     override val layoutResId: Int = R.layout.fragment_splash

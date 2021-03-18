@@ -22,6 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class ServiceFactory @Inject constructor(
     private val authInterceptor: AuthInterceptor,
+    private val authenticatorImpl: AuthenticatorImpl,
     private val authPreferences: AuthPreferences
 ) {
 
@@ -33,7 +34,7 @@ class ServiceFactory @Inject constructor(
 
     private val httpClient by lazy {
         OkHttpClient.Builder()
-            .authenticator(AuthenticatorImpl(this))
+            .authenticator(authenticatorImpl)
             .addInterceptor(authInterceptor)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.MINUTES)
@@ -51,16 +52,4 @@ class ServiceFactory @Inject constructor(
     }
 
     fun <T> createService(clazz: Class<T>) = retrofit.create(clazz)
-
-    suspend fun createWebSocket(webSocketListener: WebSocketListener): WebSocket {
-        val auth = authPreferences.data.first()
-        val tokenValue = "$HEADER_AUTHORIZATION_BEARER ${auth.authorizationToken}"
-        return httpClient.newWebSocket(
-            Request.Builder()
-                .url("ws://elepsio.herokuapp.com/")
-                .header(HEADER_AUTHORIZATION, tokenValue)
-                .build(),
-            webSocketListener
-        )
-    }
 }
