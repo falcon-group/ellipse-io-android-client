@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="placeholder_last_heart_rate">Останнє показання пульсу %d</string>
+    <string name="placeholder_connecting">З’єднання з %s</string>
+    <string name="placeholder_connected">Під’єднано до %s</string>
+    <string name="placeholder_disconnected">Від’єднано від %s</string>
+    <string name="placeholder_disconnecting">Від’єднання від %s</string>
+    <string name="placeholder_error_while_connecting">Помилка при з’єднанні з %s</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_no_connection">Інтернет-з’єднання втрачене. Під’єднайтеся до мобільного інтернета або Wi-fi.</string>
+    <string name="error_irregular_request">Неправильні данні запита.</string>
+    <string name="error_inappropriate_credentials">Логін або пароль не збігаються.</string>
+    <string name="error_network_request_issue">Помилка при обробці мережевого запиту.</string>
+    <string name="error_internal">Щось пішло не так.</string>
+    <string name="error_phone_is_empty">Номер телефону не може бути пустим</string>
+    <string name="error_phone_is_insufficient">Номер телефону неповний</string>
+    <string name="error_insufficient_field">Введення неповне</string>
+    <string name="error_password_is_empty">Пароль не може бути пустим</string>
+    <string name="error_title_is_empty">Заголовок не може бути пустим</string>
+    <string name="error_title_is_insufficient">Довжина заголовка повинна бути більше 1 та меньше 100 символів</string>
+    <string name="error_content_is_insufficient">Довжина вмісту повинна бути більше 1 та меньше 1000 символів</string>
+</resources>

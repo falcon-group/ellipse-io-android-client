@@ -14,4 +14,6 @@
     <string name="content_dialog_enable_bluetooth">To handle your heart rate you should enable bluetooth</string>
     <string name="title_start_urgent">Start</string>
     <string name="title_stop_urgent">Stop</string>
+    <string name="message_connection_started">Connection started</string>
+    <string name="title_device_connected">Device connected %s</string>
 </resources>
